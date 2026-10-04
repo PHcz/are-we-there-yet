@@ -1,6 +1,6 @@
 # are-we-there-yet
 
-A Claude Code plugin that messages you when a session **is waiting for you** (a question, a permission prompt, idle input) or **has finished a task**. Each message carries the session name and a short summary.
+A Claude Code plugin that messages you when a session **is waiting for you** (an `AskUserQuestion` question, a permission prompt or an elicitation dialog) or **has finished a task**. Each message carries the session name and a short summary.
 
 ```
 ✅ [auth refactor] Done · 4m12s
@@ -31,6 +31,8 @@ Layers, later wins: built-in defaults → `~/.config/claude-notify/config.json` 
 }
 ```
 
+Defaults: `channels` is `["macos"]` (only macOS notifications are on until you configure another channel), both events on, `summary` is `last-message` with `maxChars` 300. Waiting alerts fire for `AskUserQuestion` questions and permission/elicitation prompts; finished turns are reported by the Done alert.
+
 Secrets can be `env:VAR` or `keychain:<service>` (macOS: `security add-generic-password -s <service> -a "$USER" -w <token>`).
 
 ### Filters
@@ -42,12 +44,18 @@ Secrets can be `env:VAR` or `keychain:<service>` (macOS: `security add-generic-p
 | `filters.debounceSec` | 0 (off) | At most one "done" per session per N seconds |
 | `filters.always` | false | Ignore the three filters above for "done" |
 
+Scoping: `minDurationSec` and `debounceSec` apply to Done only (debounce counts only previous Done messages). `onlyWhenAwaySec` applies to both Done and waiting alerts. `always` bypasses the three filters for Done only. Waiting alerts always use the last-message summary.
+
 ### `/notify` in any session
 
 ```
 /notify                       show effective settings and last error
 /notify off | on              this session only
 /notify channel=pushover,macos min=300 away=120
+/notify done=off waiting=on   enable/disable each event (on|off)
+/notify debounce=60 always=on at most one Done per 60 s; always=on bypasses filters for Done
+/notify max=200               summary length in characters
+/notify channels=telegram     alias of channel=
 /notify summary=llm           one-line Haiku summary instead of Claude's last message
 /notify name="auth refactor"  name used in messages
 /notify reset                 drop this session's overrides
@@ -74,5 +82,5 @@ Secrets can be `env:VAR` or `keychain:<service>` (macOS: `security add-generic-p
 ## Troubleshooting
 
 - `/notify` shows the last error; full log at `~/.config/claude-notify/error.log`.
-- Dry run a hook: `echo '{"session_id":"t","cwd":"'$PWD'","hook_event_name":"Stop","last_assistant_message":"hi"}' | CLAUDE_NOTIFY_SYNC=1 DRY_RUN=1 bin/run.sh`
+- Dry run a hook: `echo '{"session_id":"t","cwd":"'"'"'"$PWD"'"'"'","hook_event_name":"Stop","last_assistant_message":"hi"}' | CLAUDE_NOTIFY_HOME=$(mktemp -d) CLAUDE_NOTIFY_SYNC=1 CLAUDE_NOTIFY_DRY_RUN=1 bin/run.sh`
 - Run tests: `npm test`

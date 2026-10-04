@@ -1,5 +1,6 @@
 {
   "name": "are-we-there-yet-local",
+  "description": "Local marketplace for the are-we-there-yet Claude Code notification plugin",
   "owner": { "name": "Petr Hložánek" },
   "plugins": [
     {
