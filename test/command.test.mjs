@@ -45,6 +45,20 @@ test('invalid values produce errors', () => {
   assert.equal(c.errors.length, 5);
 });
 
+test('prototype keys are unknown settings, not crashes', () => {
+  assert.equal(parseNotifyCommand('/notify constructor=1 __proto__=1 toString=x').errors.length, 3);
+});
+
+test('test/reset combined with settings is an error regardless of order', () => {
+  assert.equal(parseNotifyCommand('/notify test min=5').errors.length, 1);
+  assert.equal(parseNotifyCommand('/notify min=5 test').errors.length, 1);
+  assert.equal(parseNotifyCommand('/notify reset on').errors.length, 1);
+});
+
+test('empty channel list is rejected', () => {
+  assert.equal(parseNotifyCommand('/notify channel=,').errors.length, 1);
+});
+
 test('applyCommand writes session override', () => {
   tmpHome();
   const msg = applyCommand(parseNotifyCommand('/notify off'), { cwd: '/tmp', sessionId: 's1' });
