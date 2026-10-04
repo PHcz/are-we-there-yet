@@ -1,0 +1,11 @@
+{
+  "name": "are-we-there-yet-local",
+  "owner": { "name": "Petr Hložánek" },
+  "plugins": [
+    {
+      "name": "are-we-there-yet",
+      "source": "./",
+      "description": "Notify me when Claude Code is waiting or done"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "are-we-there-yet",
+  "version": "0.1.0",
+  "description": "Pings you on Telegram, ntfy, Pushover, Slack, Discord, macOS and more when Claude Code is waiting for you or has finished a task.",
+  "author": { "name": "Petr Hložánek" },
+  "license": "MIT"
+}
