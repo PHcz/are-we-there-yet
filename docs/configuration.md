@@ -106,7 +106,7 @@ The first time the plugin reads an item, macOS may ask whether `security` may ac
 /awty [global|project] [setting…] | reset | test
 ```
 
-With no scope word, changes apply to **this session only**. `global` writes to `~/.config/are-we-there-yet/config.json`; `project` writes to `<project>/.claude/awty.json`.
+With no scope word, changes apply to **this session only**. `global` writes to `~/.config/are-we-there-yet/config.json`; `project` writes to `<project>/.claude/awty.json`. In a terminal, `awty set project …` writes `<current folder>/.claude/awty.json`, so run it from the project root.
 
 | Write | Sets |
 |---|---|

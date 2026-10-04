@@ -1,10 +1,10 @@
 # How it works
 
-are-we-there-yet is a Claude Code plugin made of **hooks**: small scripts that Claude Code itself runs when certain things happen in a session. Claude doesn't decide when to notify you, so notifications are reliable and cost no tokens.
+are-we-there-yet works with Claude Code, Codex CLI and Antigravity CLI. For each it installs **hooks**: small scripts that the tool itself runs when certain things happen in a session. The agent doesn't decide when to notify you, so notifications are reliable and cost no tokens.
 
 ## What triggers a message
 
-| Claude Code event | Message | When |
+| Claude Code event (Codex and Antigravity: see [Supported tools](tools.md)) | Message | When |
 |---|---|---|
 | `Stop` | ✅ **Done** | Claude finished responding and handed control back to you |
 | `PreToolUse` on `AskUserQuestion` | ❓ **Waiting for you** | Claude asked a multiple-choice question. Sent immediately, with the question and options. |

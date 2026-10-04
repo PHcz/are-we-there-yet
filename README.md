@@ -43,6 +43,8 @@ awty install agy       # Google Antigravity CLI
 
 **3. Send a test message:** `awty test`
 
+After `npm update -g @phcz/are-we-there-yet`, re-run `awty install <tool>` for each tool. Before `npm uninstall -g`, run `awty uninstall <tool>` first. Details: [Upgrading and uninstalling](docs/tools.md#upgrading-and-uninstalling).
+
 Out of the box only **macOS notifications** are on. To get messages on your phone, set up a channel. Telegram takes about five minutes: see [Telegram setup](docs/channels.md#telegram).
 
 ---
