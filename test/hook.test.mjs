@@ -90,6 +90,11 @@ test('Notification permission prompt sends; deduped after a question; other type
   assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'auth_success', message: 'x' }, { now: NOW + 999_999, idle: noIdle }), {});
 });
 
+test('permission Notification right after an AskUserQuestion alert is deduped', () => {
+  handle({ ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } }, { now: NOW, idle: noIdle });
+  assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'x' }, { now: NOW + 1000, idle: noIdle }), {});
+});
+
 test('CLAUDE_NOTIFY_DISABLE makes handler a no-op', () => {
   process.env.CLAUDE_NOTIFY_DISABLE = '1';
   saveState('s1', { turnStartedAt: NOW - 125_000 });
