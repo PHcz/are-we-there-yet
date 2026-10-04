@@ -49,6 +49,10 @@ test('resolveSecrets throws on unresolved reference', () => {
   assert.throws(() => resolveSecrets({ a: 'env:MISSING' }, { env: {} }), /unresolved secret env:MISSING/);
 });
 
+test('resolveSecrets leaves literal empty strings alone', () => {
+  assert.deepEqual(resolveSecrets({ a: '', b: 'x' }, { env: {} }), { a: '', b: 'x' });
+});
+
 test('logError caps file at 200 lines', () => {
   tmpHome();
   for (let i = 0; i < 205; i++) logError(`e${i}`);
