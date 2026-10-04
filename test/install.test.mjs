@@ -114,3 +114,139 @@ test('installStatus reports each tool and scope', () => {
   assert.equal(get('codex', 'project'), false);
   assert.equal(get('agy', 'global'), false);
 });
+
+const seed = (tool, obj, opts) => {
+  const file = targetFile(tool, opts);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, typeof obj === 'string' ? obj : JSON.stringify(obj));
+  return file;
+};
+
+test('non-object "hooks" is refused and the file is untouched', () => {
+  const file = seed('codex', '{"hooks":[1,2]}');
+  assert.throws(() => install('codex'), /"hooks" is not an object/);
+  assert.throws(() => uninstall('codex'), /"hooks" is not an object/);
+  assert.equal(fs.readFileSync(file, 'utf8'), '{"hooks":[1,2]}');
+  assert.ok(!fs.existsSync(`${file}.awty-backup`));
+});
+
+test('non-array event is refused on install and uninstall', () => {
+  const text = '{"hooks":{"Stop":{"a":1}}}';
+  const file = seed('codex', text);
+  assert.throws(() => install('codex'), /"hooks.Stop" is not an array/);
+  assert.throws(() => uninstall('codex'), /not an array/);
+  assert.equal(fs.readFileSync(file, 'utf8'), text);
+});
+
+test('a group that mixes a foreign hook with ours keeps the foreign hook', () => {
+  const file = seed('codex', { hooks: { Stop: [{ matcher: 'x', hooks: [{ type: 'command', command: 'other.sh' }, { type: 'command', command: `"${RUN_PATH}" --tool codex` }] }] } });
+  install('codex');
+  let doc = read(file);
+  assert.deepEqual(doc.hooks.Stop[0], { matcher: 'x', hooks: [{ type: 'command', command: 'other.sh' }] });
+  assert.equal(doc.hooks.Stop.length, 2);
+  assert.equal(uninstall('codex').removed, true);
+  doc = read(file);
+  assert.deepEqual(doc.hooks, { Stop: [{ matcher: 'x', hooks: [{ type: 'command', command: 'other.sh' }] }] });
+});
+
+test('uninstall keeps a user\'s pre-existing empty event array', () => {
+  const file = seed('codex', { hooks: { PostToolUse: [] } });
+  install('codex');
+  assert.equal(uninstall('codex').removed, true);
+  assert.deepEqual(read(file), { hooks: { PostToolUse: [] } });
+});
+
+test('backup equals the original bytes and is not overwritten by a later change', () => {
+  const original = '{ "hooks": {}, "keep":   1 }\n';
+  const file = seed('codex', original);
+  install('codex');
+  assert.equal(fs.readFileSync(`${file}.awty-backup`, 'utf8'), original);
+  uninstall('codex');
+  install('codex');
+  assert.equal(fs.readFileSync(`${file}.awty-backup`, 'utf8'), original);
+});
+
+test('uninstall refuses a malformed file and leaves it alone', () => {
+  const file = seed('agy', '{oops');
+  assert.throws(() => uninstall('agy'), /not valid JSON/);
+  assert.equal(fs.readFileSync(file, 'utf8'), '{oops');
+});
+
+test('uninstall with nothing to remove leaves the file bytes unchanged', () => {
+  const text = '{"hooks":{"Stop":[{"hooks":[{"command":"other.sh"}]}]},   "x":1}';
+  const file = seed('codex', text);
+  assert.equal(uninstall('codex').removed, false);
+  assert.equal(fs.readFileSync(file, 'utf8'), text);
+  const agyText = '{"my-linter":{}}';
+  const agyFile = seed('agy', agyText);
+  assert.equal(uninstall('agy').removed, false);
+  assert.equal(fs.readFileSync(agyFile, 'utf8'), agyText);
+});
+
+test('codex --project installs and uninstalls in <cwd>/.codex/hooks.json', () => {
+  install('codex', { project: true, cwd });
+  const file = path.join(cwd, '.codex', 'hooks.json');
+  assert.equal(read(file).hooks.Stop.length, 1);
+  assert.ok(!fs.existsSync(targetFile('codex')));
+  assert.equal(uninstall('codex', { project: true, cwd }).removed, true);
+  assert.deepEqual(read(file), { hooks: {} });
+});
+
+test('a symlinked config file stays a symlink and its target is updated', () => {
+  const target = path.join(cwd, 'dotfiles-hooks.json');
+  fs.writeFileSync(target, '{"hooks":{}}');
+  const file = targetFile('codex');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.symlinkSync(target, file);
+  install('codex');
+  assert.ok(fs.lstatSync(file).isSymbolicLink());
+  assert.equal(read(target).hooks.Stop.length, 1);
+  assert.equal(fs.readdirSync(path.dirname(target)).filter((f) => f.includes('awty-tmp')).length, 0);
+});
+
+test('claude install on an already-installed plugin also updates it', () => {
+  const calls = [];
+  const run = (cmd, args) => {
+    calls.push(args.join(' '));
+    return { status: 0, stdout: args[1] === 'install' ? 'Plugin is already installed' : '' };
+  };
+  const r = install('claude', { run });
+  assert.deepEqual(calls.slice(2), [
+    'plugin marketplace update are-we-there-yet-local',
+    'plugin update are-we-there-yet@are-we-there-yet-local',
+  ]);
+  assert.ok(r.notes.includes('Updated the Claude Code plugin to this version.'));
+  const failing = (cmd, args) => (args[1] === 'update' ? { status: 1, stderr: 'boom' } : { status: 0, stdout: 'is already installed' });
+  assert.throws(() => install('claude', { run: failing }), /boom/);
+});
+
+test('claude uninstall reports ENOENT and failures, and succeeds otherwise', () => {
+  const missing = () => ({ error: Object.assign(new Error('x'), { code: 'ENOENT' }) });
+  assert.throws(() => uninstall('claude', { run: missing }), /claude not found on PATH\. Run yourself:\n  claude plugin uninstall are-we-there-yet@are-we-there-yet-local/);
+  assert.throws(() => uninstall('claude', { run: () => ({ status: 1, stderr: ' not installed ' }) }), /uninstall failed: not installed/);
+  assert.deepEqual(uninstall('claude', { run: () => ({ status: 0 }) }), { removed: true });
+});
+
+test('missing tool name is a clear error', () => {
+  assert.throws(() => install(undefined), /which tool\? use: awty install <claude\|codex\|agy>/);
+  assert.throws(() => uninstall(undefined), /which tool\?/);
+});
+
+test('installStatus flags stale paths for codex and agy', () => {
+  const stale = (c) => c.replace(RUN_PATH, '/gone/bin/run.sh');
+  const codexFile = seed('codex', { hooks: { Stop: [{ hooks: [{ type: 'command', command: stale(`"${RUN_PATH}" --tool codex`) }] }] } });
+  install('agy');
+  const agyFile = targetFile('agy');
+  fs.writeFileSync(agyFile, fs.readFileSync(agyFile, 'utf8').split(RUN_PATH).join('/gone/bin/run.sh'));
+  const run = () => ({ status: 0, stdout: '' });
+  const get = (s, tool, scope) => s.find((x) => x.tool === tool && x.scope === scope).installed;
+  let s = installStatus({ cwd, run });
+  assert.equal(get(s, 'codex', 'global'), 'stale');
+  assert.equal(get(s, 'agy', 'global'), 'stale');
+  install('codex');
+  install('agy');
+  s = installStatus({ cwd, run });
+  assert.equal(get(s, 'codex', 'global'), true);
+  assert.equal(get(s, 'agy', 'global'), true);
+  assert.ok(codexFile);
+});
