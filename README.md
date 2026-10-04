@@ -82,5 +82,10 @@ Scoping: `minDurationSec` and `debounceSec` apply to Done only (debounce counts 
 ## Troubleshooting
 
 - `/notify` shows the last error; full log at `~/.config/claude-notify/error.log`.
-- Dry run a hook: `echo '{"session_id":"t","cwd":"'"'"'"$PWD"'"'"'","hook_event_name":"Stop","last_assistant_message":"hi"}' | CLAUDE_NOTIFY_HOME=$(mktemp -d) CLAUDE_NOTIFY_SYNC=1 CLAUDE_NOTIFY_DRY_RUN=1 bin/run.sh`
+- Dry run a hook (prints what would be sent, touches nothing real):
+
+  ```bash
+  echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"Stop\",\"last_assistant_message\":\"hi\"}" | CLAUDE_NOTIFY_HOME=$(mktemp -d) CLAUDE_NOTIFY_SYNC=1 CLAUDE_NOTIFY_DRY_RUN=1 bin/run.sh
+  ```
+
 - Run tests: `npm test`
