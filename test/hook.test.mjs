@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { tmpHome } from './helpers.mjs';
 import { writeJson } from '../lib/jsonfile.mjs';
-import { globalConfigPath } from '../lib/paths.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { globalConfigPath, projectConfigPath } from '../lib/paths.mjs';
 import { loadState, saveState } from '../lib/state.mjs';
 import { handle } from '../lib/hook.mjs';
 
@@ -86,8 +89,37 @@ test('Notification permission prompt sends; deduped after a question; other type
   const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'Claude needs permission to use Bash' }, { now: NOW, idle: noIdle });
   assert.equal(r.job.waitingReason, 'permission');
   assert.equal(r.job.summaryInput.text, 'Claude needs permission to use Bash');
-  assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'idle_prompt', message: 'x' }, { now: NOW + 1000, idle: noIdle }), {});
+  assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'elicitation_dialog', message: 'x' }, { now: NOW + 1000, idle: noIdle }), {});
   assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'auth_success', message: 'x' }, { now: NOW + 999_999, idle: noIdle }), {});
+});
+
+test('idle_prompt notifications are ignored (Stop covers finished turns)', () => {
+  assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'idle_prompt', message: 'x' }, { now: NOW, idle: noIdle }), {});
+});
+
+test('Stop records lastDoneSentAt only for done; empty last_assistant_message falls back to transcript', () => {
+  saveState('s1', { turnStartedAt: NOW - 125_000 });
+  const r = handle({ ...base, hook_event_name: 'Stop', last_assistant_message: '' }, { now: NOW, idle: noIdle });
+  assert.match(r.job.summaryInput.text, /JWT rotation/);
+  assert.equal(loadState('s1').lastDoneSentAt, NOW);
+  saveState('s2', {});
+  handle({ ...base, session_id: 's2', hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } }, { now: NOW, idle: noIdle });
+  assert.equal(loadState('s2').lastDoneSentAt, undefined);
+});
+
+test('project layer uses CLAUDE_PROJECT_DIR over cwd', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'awty-proj-'));
+  try {
+    writeJson(projectConfigPath(dir), { events: { waiting: false } });
+    const ask = { ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } };
+    assert.ok(handle(ask, { now: NOW, idle: noIdle }).job);
+    saveState('s1', {});
+    process.env.CLAUDE_PROJECT_DIR = dir;
+    assert.deepEqual(handle(ask, { now: NOW + 500_000, idle: noIdle }), {});
+  } finally {
+    delete process.env.CLAUDE_PROJECT_DIR;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('permission Notification right after an AskUserQuestion alert is deduped', () => {

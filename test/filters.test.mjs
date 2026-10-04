@@ -21,8 +21,9 @@ test('minDuration applies to done only', () => {
 
 test('debounce', () => {
   const c = cfg({ filters: { minDurationSec: 0, debounceSec: 60 } });
-  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { lastSentAt: NOW - 10_000 }, now: NOW, idleSec: null }).ok, false);
-  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { lastSentAt: NOW - 70_000 }, now: NOW, idleSec: null }).ok, true);
+  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { lastDoneSentAt: NOW - 10_000 }, now: NOW, idleSec: null }).ok, false);
+  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { lastDoneSentAt: NOW - 70_000 }, now: NOW, idleSec: null }).ok, true);
+  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { lastSentAt: NOW - 1_000, lastWaitingSentAt: NOW - 1_000 }, now: NOW, idleSec: null }).ok, true);
 });
 
 test('onlyWhenAway applies to both kinds; null idle passes', () => {
@@ -35,7 +36,7 @@ test('onlyWhenAway applies to both kinds; null idle passes', () => {
 
 test('always bypasses duration, debounce and away for done', () => {
   const c = cfg({ filters: { always: true, minDurationSec: 999, debounceSec: 999, onlyWhenAwaySec: 999 } });
-  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { turnStartedAt: NOW, lastSentAt: NOW }, now: NOW, idleSec: 0 }).ok, true);
+  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { turnStartedAt: NOW, lastDoneSentAt: NOW }, now: NOW, idleSec: 0 }).ok, true);
 });
 
 test('notification waiting deduped against recent question alert', () => {

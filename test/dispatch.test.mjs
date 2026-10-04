@@ -10,7 +10,7 @@ const msg = { title: 'T "q"', body: 'B\\x', text: 'T\nB', kind: 'done' };
 test('macos builds osascript with escaped strings', async () => {
   let call;
   await macos.send(msg, { sound: 'Glass' }, { exec: async (f, a) => { call = [f, a]; return { stdout: '' }; } });
-  assert.equal(call[0], 'osascript');
+  assert.equal(call[0], '/usr/bin/osascript');
   assert.equal(call[1][1], 'display notification "B\\\\x" with title "T \\"q\\"" sound name "Glass"');
 });
 
@@ -20,6 +20,16 @@ test('apprise passes title, body, config and urls; ENOENT gives install hint', a
   assert.deepEqual(call, ['apprise', ['-t', msg.title, '-b', msg.body, '--config', '/c.yml', 'tgram://x']]);
   const enoent = Object.assign(new Error('spawn apprise ENOENT'), { code: 'ENOENT' });
   await assert.rejects(apprise.send(msg, {}, { exec: async () => { throw enoent; } }), /uv tool install apprise/);
+});
+
+test('apprise errors never leak argv/secrets', async () => {
+  const err = Object.assign(new Error('Command failed: apprise tgram://SECRET'), { code: 2, stderr: 'bad url\n' });
+  await assert.rejects(apprise.send(msg, { urls: ['tgram://SECRET'] }, { exec: async () => { throw err; } }), (e) => {
+    assert.match(e.message, /bad url/);
+    assert.match(e.message, /exit 2/);
+    assert.doesNotMatch(e.message, /SECRET/);
+    return true;
+  });
 });
 
 test('registry has all ten channels', () => {

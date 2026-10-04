@@ -14,7 +14,7 @@ function runHook(input, extraEnv = {}) {
   return spawnSync(RUN, [], {
     input: JSON.stringify(input),
     encoding: 'utf8',
-    env: { ...process.env, CLAUDE_NOTIFY_SYNC: '1', DRY_RUN: '1', ...extraEnv },
+    env: { ...process.env, CLAUDE_NOTIFY_SYNC: '1', CLAUDE_NOTIFY_DRY_RUN: '1', ...extraEnv },
   });
 }
 

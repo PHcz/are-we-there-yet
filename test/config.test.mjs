@@ -60,3 +60,11 @@ test('logError caps file at 200 lines', () => {
   assert.equal(lines.length, 200);
   assert.match(readLastError(), /e204$/);
 });
+
+test('loadConfig normalizes channels to an array', () => {
+  tmpHome();
+  writeJson(globalConfigPath(), { channels: 'telegram' });
+  assert.deepEqual(loadConfig({}).channels, ['telegram']);
+  writeJson(globalConfigPath(), { channels: 5 });
+  assert.deepEqual(loadConfig({}).channels, []);
+});

@@ -9,6 +9,6 @@ export async function send(msg, cfg = {}, { exec = promisify(execFile), signal }
     await exec('apprise', args, { timeout: 8000, signal });
   } catch (err) {
     if (err.code === 'ENOENT') throw new Error('apprise: not installed — run: uv tool install apprise');
-    throw new Error(`apprise: ${err.message}`);
+    throw new Error(`apprise: exit ${err.code ?? 'error'}: ${String(err.stderr || '').trim().slice(0, 200)}`);
   }
 }
