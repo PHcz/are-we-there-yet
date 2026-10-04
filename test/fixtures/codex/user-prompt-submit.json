@@ -1,0 +1,10 @@
+{
+  "session_id": "01a10787-42c2-74c3-a31d-f68e0f3085e2",
+  "turn_id": "01a1078b-1579-7d82-ab14-66c6b25f6e86",
+  "transcript_path": "/Users/jane/.codex/sessions/2026/10/04/rollout-2026-10-04T16-27-47-01a10787-42c2-74c3-a31d-f68e0f3085e2.jsonl",
+  "cwd": "/Users/jane/code/demo",
+  "hook_event_name": "UserPromptSubmit",
+  "model": "gpt-test",
+  "permission_mode": "default",
+  "prompt": "exit"
+}

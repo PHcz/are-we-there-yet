@@ -1,0 +1,21 @@
+{
+  "artifactDirectoryPath": "/Users/jane/.gemini/antigravity-cli/brain/7a4c102d-60ce-4a6b-af70-2b6ef86ec501",
+  "conversationId": "7a4c102d-60ce-4a6b-af70-2b6ef86ec501",
+  "modelName": "gemini-test",
+  "stepIdx": 2,
+  "toolCall": {
+    "args": {
+      "CodeContent": "hi\n",
+      "Description": "Create hello4.txt containing 'hi'",
+      "Overwrite": true,
+      "TargetFile": "/Users/jane/code/demo/hello4.txt",
+      "toolAction": "Creating hello4.txt",
+      "toolSummary": "Create hello4.txt"
+    },
+    "name": "write_to_file"
+  },
+  "transcriptPath": "/Users/jane/.gemini/antigravity-cli/brain/7a4c102d-60ce-4a6b-af70-2b6ef86ec501/.system_generated/logs/transcript_full.jsonl",
+  "workspacePaths": [
+    "/Users/jane/code/demo"
+  ]
+}
