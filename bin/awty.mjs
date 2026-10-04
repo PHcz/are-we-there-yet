@@ -21,6 +21,6 @@ if (cmd === 'hook' || (cmd === undefined && !process.stdin.isTTY)) {
     .catch((err) => logError(`hook: ${err?.stack ?? err}`))
     .finally(() => { process.exitCode = 0; });
 } else {
-  process.stderr.write('usage: awty hook [--tool claude|codex|agy] [--event <name>]\n');
-  process.exitCode = 2;
+  const { runCli } = await import('../lib/cli.mjs');
+  process.exitCode = await runCli(cmd === undefined ? [] : [cmd, ...rest]);
 }
