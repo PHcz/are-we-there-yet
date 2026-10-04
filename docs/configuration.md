@@ -11,6 +11,7 @@ Settings are merged from four layers; later layers win:
 | 3. Project | `<project>/.claude/awty.json` | editing the file, or `/awty project …` |
 | 4. Session | stored per session ID | `/awty …` |
 
+- The project file `<project>/.claude/awty.json` applies to all tools, not just Claude Code. In a terminal, `awty set global|project …` does the same as `/awty global|project …`.
 - Objects are merged key by key. Lists such as `channels` and plain values are replaced.
 - The project layer is read from the project root (`CLAUDE_PROJECT_DIR`), so it still applies after Claude `cd`s into a subfolder.
 - Session settings disappear with the session; their files are cleaned up after 14 days.

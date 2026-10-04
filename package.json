@@ -1,9 +1,14 @@
 {
-  "name": "are-we-there-yet",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@phcz/are-we-there-yet",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Claude Code plugin: pings you when a session is waiting for you or done",
+  "description": "Get pinged on Telegram, ntfy, Pushover, Slack, macOS and more when Claude Code, Codex CLI or Antigravity is waiting for you or done",
+  "bin": { "awty": "bin/awty.mjs" },
+  "files": ["bin", "lib", "channels", "adapters", "hooks", "commands", ".claude-plugin", "docs/*.md", "README.md"],
   "scripts": { "test": "node --test \"test/*.test.mjs\"" },
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=20" },
+  "keywords": ["claude-code", "codex", "antigravity", "ai-agents", "notifications", "telegram", "ntfy", "pushover"],
+  "repository": { "type": "git", "url": "git+https://github.com/PHcz/are-we-there-yet.git" },
+  "license": "MIT",
+  "publishConfig": { "access": "public" }
 }

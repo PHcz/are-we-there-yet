@@ -11,6 +11,8 @@ are-we-there-yet is a Claude Code plugin made of **hooks**: small scripts that C
 | `Notification` (`permission_prompt`, `elicitation_dialog`, `agent_needs_input`) | ⏳ **Waiting for you** | Claude needs permission to run a tool, or an MCP server is asking for input |
 | `UserPromptSubmit` | — | Records when your request started, which is used for the "took 4m12s" duration, and handles `/awty` commands |
 
+The table shows Claude Code's events. For the Codex CLI and Antigravity events, see [Supported tools](tools.md).
+
 Claude Code also sends an "idle" notification about a minute after every finished turn. The plugin ignores it, because the Done message already covers that moment and it would otherwise send a second ping each time.
 
 ## What a message contains
@@ -65,6 +67,6 @@ All files are created readable only by you.
 
 ## Requirements
 
-- Claude Code with plugin support
+- Claude Code, Codex CLI (with hooks) or Antigravity CLI
 - Node.js 20 or newer. The hook finds it on your `PATH`, or at `/opt/homebrew/bin/node`, `/usr/local/bin/node` or `~/.volta/bin/node`.
 - macOS for the `macos` channel, `onlyWhenAwaySec` and `keychain:` secrets. Everything else works on Linux too.
