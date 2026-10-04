@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { tmpHome } from './helpers.mjs';
@@ -44,4 +45,20 @@ test('garbage stdin still exits 0 and logs', () => {
   const res = spawnSync(RUN, [], { input: 'not json', encoding: 'utf8', env: { ...process.env } });
   assert.equal(res.status, 0);
   assert.equal(res.stdout, '');
+});
+
+test('Codex Stop through run.sh --tool codex prints a labelled dry-run message', () => {
+  tmpHome();
+  writeJson(globalConfigPath(), { channels: ['telegram'] });
+  const codexDir = fileURLToPath(new URL('./fixtures/codex/', import.meta.url));
+  const raw = fs.readFileSync(`${codexDir}stop.json`, 'utf8');
+  const res = spawnSync(RUN, ['--tool', 'codex'], {
+    input: raw,
+    encoding: 'utf8',
+    env: { ...process.env, AWTY_SYNC: '1', AWTY_DRY_RUN: '1', CODEX_HOME: codexDir },
+  });
+  assert.equal(res.status, 0);
+  const line = JSON.parse(res.stdout.trim().split('\n')[0]);
+  assert.equal(line.title, '✅ [Codex · Create hello3.txt] Done');
+  assert.match(line.body, /^Created hello3\.txt containing hi\./);
 });

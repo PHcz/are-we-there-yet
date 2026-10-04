@@ -6,5 +6,5 @@
   "hook_event_name": "UserPromptSubmit",
   "model": "gpt-test",
   "permission_mode": "default",
-  "prompt": "exit"
+  "prompt": "create a file hello2.txt containing hi"
 }
