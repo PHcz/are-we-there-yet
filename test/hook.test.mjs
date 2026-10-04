@@ -17,7 +17,7 @@ const noIdle = () => null;
 
 beforeEach(() => {
   tmpHome();
-  delete process.env.CLAUDE_NOTIFY_DISABLE;
+  delete process.env.AWTY_DISABLE;
   writeJson(globalConfigPath(), { channels: ['telegram'] });
 });
 
@@ -31,8 +31,8 @@ test('UserPromptSubmit records turn start and first prompt', () => {
   assert.equal(loadState('s1').turnStartedAt, NOW + 5);
 });
 
-test('/notify is blocked with status reason and applies overrides', () => {
-  const r = handle({ ...base, hook_event_name: 'UserPromptSubmit', prompt: '/notify off' }, { now: NOW });
+test('/awty is blocked with status reason and applies overrides', () => {
+  const r = handle({ ...base, hook_event_name: 'UserPromptSubmit', prompt: '/awty off' }, { now: NOW });
   assert.equal(r.stdout.decision, 'block');
   assert.match(r.stdout.reason, /updated this session/);
   assert.match(r.stdout.reason, /Notifications: OFF/);
@@ -40,9 +40,9 @@ test('/notify is blocked with status reason and applies overrides', () => {
   assert.equal(r.job, undefined);
 });
 
-test('/notify test returns a test job bypassing filters', () => {
+test('/awty test returns a test job bypassing filters', () => {
   saveState('s1', { override: { enabled: false } });
-  const r = handle({ ...base, hook_event_name: 'UserPromptSubmit', prompt: '/notify test' }, { now: NOW });
+  const r = handle({ ...base, hook_event_name: 'UserPromptSubmit', prompt: '/awty test' }, { now: NOW });
   assert.equal(r.stdout.decision, 'block');
   assert.match(r.stdout.reason, /Sending test to: telegram/);
   assert.equal(r.job.kind, 'test');
@@ -127,8 +127,8 @@ test('permission Notification right after an AskUserQuestion alert is deduped', 
   assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'x' }, { now: NOW + 1000, idle: noIdle }), {});
 });
 
-test('CLAUDE_NOTIFY_DISABLE makes handler a no-op', () => {
-  process.env.CLAUDE_NOTIFY_DISABLE = '1';
+test('AWTY_DISABLE makes handler a no-op', () => {
+  process.env.AWTY_DISABLE = '1';
   saveState('s1', { turnStartedAt: NOW - 125_000 });
   assert.deepEqual(handle({ ...base, hook_event_name: 'Stop' }, { now: NOW }), {});
 });

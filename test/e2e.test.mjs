@@ -14,7 +14,7 @@ function runHook(input, extraEnv = {}) {
   return spawnSync(RUN, [], {
     input: JSON.stringify(input),
     encoding: 'utf8',
-    env: { ...process.env, CLAUDE_NOTIFY_SYNC: '1', CLAUDE_NOTIFY_DRY_RUN: '1', ...extraEnv },
+    env: { ...process.env, AWTY_SYNC: '1', AWTY_DRY_RUN: '1', ...extraEnv },
   });
 }
 
@@ -30,9 +30,9 @@ test('Stop hook end-to-end prints dry-run message', () => {
   assert.match(lines[0].body, /^Shipped it\n📁 \/x\/api · \d\d:\d\d$/);
 });
 
-test('/notify prompt prints block JSON', () => {
+test('/awty prompt prints block JSON', () => {
   tmpHome();
-  const res = runHook({ session_id: 'e2', cwd: '/x', hook_event_name: 'UserPromptSubmit', prompt: '/notify min=5' });
+  const res = runHook({ session_id: 'e2', cwd: '/x', hook_event_name: 'UserPromptSubmit', prompt: '/awty min=5' });
   assert.equal(res.status, 0);
   const out = JSON.parse(res.stdout);
   assert.equal(out.decision, 'block');

@@ -4,6 +4,6 @@ import path from 'node:path';
 
 export function tmpHome() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'awty-'));
-  process.env.CLAUDE_NOTIFY_HOME = dir;
+  process.env.AWTY_HOME = dir;
   return dir;
 }

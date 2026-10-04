@@ -19,7 +19,7 @@ To try it without installing: `claude --plugin-dir /path/to/are-we-there-yet`. R
 
 ## Configure
 
-Layers, later wins: built-in defaults → `~/.config/claude-notify/config.json` → `<project>/.claude/notify.json` → per-session `/notify` overrides.
+Layers, later wins: built-in defaults → `~/.config/are-we-there-yet/config.json` → `<project>/.claude/awty.json` → per-session `/awty` overrides.
 
 ```json
 {
@@ -46,22 +46,22 @@ Secrets can be `env:VAR` or `keychain:<service>` (macOS: `security add-generic-p
 
 Scoping: `minDurationSec` and `debounceSec` apply to Done only (debounce counts only previous Done messages). `onlyWhenAwaySec` applies to both Done and waiting alerts. `always` bypasses the three filters for Done only. Waiting alerts always use the last-message summary.
 
-### `/notify` in any session
+### `/awty` in any session
 
 ```
-/notify                       show effective settings and last error
-/notify off | on              this session only
-/notify channel=pushover,macos min=300 away=120
-/notify done=off waiting=on   enable/disable each event (on|off)
-/notify debounce=60 always=on at most one Done per 60 s; always=on bypasses filters for Done
-/notify max=200               summary length in characters
-/notify channels=telegram     alias of channel=
-/notify summary=llm           one-line Haiku summary instead of Claude's last message
-/notify name="auth refactor"  name used in messages
-/notify reset                 drop this session's overrides
-/notify test                  send a test message now
-/notify global channel=telegram    write to global config
-/notify project min=0              write to <project>/.claude/notify.json
+/awty                       show effective settings and last error
+/awty off | on              this session only
+/awty channel=pushover,macos min=300 away=120
+/awty done=off waiting=on   enable/disable each event (on|off)
+/awty debounce=60 always=on at most one Done per 60 s; always=on bypasses filters for Done
+/awty max=200               summary length in characters
+/awty channels=telegram     alias of channel=
+/awty summary=llm           one-line Haiku summary instead of Claude's last message
+/awty name="auth refactor"  name used in messages
+/awty reset                 drop this session's overrides
+/awty test                  send a test message now
+/awty global channel=telegram    write to global config
+/awty project min=0              write to <project>/.claude/awty.json
 ```
 
 ## Channels
@@ -81,11 +81,11 @@ Scoping: `minDurationSec` and `debounceSec` apply to Done only (debounce counts 
 
 ## Troubleshooting
 
-- `/notify` shows the last error; full log at `~/.config/claude-notify/error.log`.
+- `/awty` shows the last error; full log at `~/.config/are-we-there-yet/error.log`.
 - Dry run a hook (prints what would be sent, touches nothing real):
 
   ```bash
-  echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"Stop\",\"last_assistant_message\":\"hi\"}" | CLAUDE_NOTIFY_HOME=$(mktemp -d) CLAUDE_NOTIFY_SYNC=1 CLAUDE_NOTIFY_DRY_RUN=1 bin/run.sh
+  echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"Stop\",\"last_assistant_message\":\"hi\"}" | AWTY_HOME=$(mktemp -d) AWTY_SYNC=1 AWTY_DRY_RUN=1 bin/run.sh
   ```
 
 - Run tests: `npm test`

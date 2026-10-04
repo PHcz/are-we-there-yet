@@ -28,6 +28,6 @@ test('hooks.json registers four events through run.sh', () => {
   }
 });
 
-test('notify command exists', () => {
-  assert.ok(fs.existsSync(new URL('../commands/notify.md', import.meta.url)));
+test('awty command exists', () => {
+  assert.ok(fs.existsSync(new URL('../commands/awty.md', import.meta.url)));
 });
