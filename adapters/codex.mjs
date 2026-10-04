@@ -4,6 +4,7 @@ import { readTailLines } from '../lib/transcript.mjs';
 
 export const name = 'codex';
 export const label = 'Codex';
+export const commandWord = 'awty';
 
 export function codexHome() {
   return process.env.CODEX_HOME || path.join(os.homedir(), '.codex');

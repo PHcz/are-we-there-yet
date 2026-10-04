@@ -2,6 +2,7 @@ import { readHeadLines, readTailLines } from '../lib/transcript.mjs';
 
 export const name = 'agy';
 export const label = 'Antigravity';
+export const commandWord = 'awty';
 
 const USER_REQUEST = /<USER_REQUEST>\s*([\s\S]*?)\s*<\/USER_REQUEST>/;
 
@@ -35,7 +36,8 @@ export function lastUserInputAt(entries) {
 }
 
 function questionText(args) {
-  return (args?.questions ?? [])
+  return (Array.isArray(args?.questions) ? args.questions : [])
+    .filter((q) => typeof q?.question === 'string' && q.question.trim())
     .map((q) => {
       const options = (q.options ?? []).map((o) => (typeof o === 'string' ? o : o?.label)).filter(Boolean);
       return options.length ? `${q.question} (${options.join(' / ')})` : q.question;
@@ -56,9 +58,8 @@ export function normalize(raw, { event } = {}) {
   const base = { tool: name, sessionId: raw.conversationId, cwd, projectDir: cwd };
   if (event === 'PreToolUse') {
     const call = raw.toolCall ?? {};
-    if (call.name === 'ask_question') return { ...base, type: 'question', firstPrompt: firstPrompt(transcript), text: questionText(call.args) };
-    if (call.name === 'ask_permission') return { ...base, type: 'question', firstPrompt: firstPrompt(transcript), text: permissionText(call.args) };
-    return null;
+    const text = call.name === 'ask_question' ? questionText(call.args) : call.name === 'ask_permission' ? permissionText(call.args) : '';
+    return text ? { ...base, type: 'question', firstPrompt: firstPrompt(transcript), text } : null;
   }
   if (event === 'Stop') {
     if (raw.fullyIdle === false) return null;

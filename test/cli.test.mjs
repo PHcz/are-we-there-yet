@@ -80,7 +80,9 @@ test('awty test sends through the dispatcher (dry run)', () => {
   assert.match(res.stdout, /Sent: telegram/);
 });
 
-test('bin/awty.mjs with no args on a TTY-less stdin still behaves as the Claude hook', () => {
+test('bin/awty.mjs with no args and piped stdin prints help instead of acting as a hook', () => {
   const res = spawnSync(AWTY, [], { input: JSON.stringify({ session_id: 'z', cwd: '/x', hook_event_name: 'UserPromptSubmit', prompt: '/awty' }), encoding: 'utf8', env: { ...process.env } });
-  assert.equal(JSON.parse(res.stdout).decision, 'block');
+  assert.equal(res.status, 0);
+  assert.match(res.stdout, /awty install <claude\|codex\|agy>/);
+  assert.doesNotMatch(res.stdout, /decision/);
 });

@@ -16,8 +16,8 @@ async function hookMain(args) {
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (cmd === 'hook' || (cmd === undefined && !process.stdin.isTTY)) {
-  hookMain(cmd === 'hook' ? rest : [])
+if (cmd === 'hook') {
+  hookMain(rest)
     .catch((err) => logError(`hook: ${err?.stack ?? err}`))
     .finally(() => { process.exitCode = 0; });
 } else {

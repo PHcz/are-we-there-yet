@@ -79,3 +79,16 @@ test('Antigravity Stop through run.sh --tool agy --event Stop prints a dry-run m
   assert.match(lines[0].title, /^✅ \[Antigravity · demo · create a file hello4\.txt containing hi\] Done/);
   assert.equal(lines[0].decision, undefined);
 });
+
+test('Antigravity ask_question through run.sh (detached send, no channels) prints nothing and exits 0', () => {
+  tmpHome();
+  writeJson(globalConfigPath(), { channels: [] });
+  const agyDir = fileURLToPath(new URL('./fixtures/agy/', import.meta.url));
+  const raw = { ...JSON.parse(fs.readFileSync(`${agyDir}pre-tool-use-ask-question.json`, 'utf8')), transcriptPath: `${agyDir}transcript.jsonl` };
+  const env = { ...process.env };
+  delete env.AWTY_SYNC;
+  delete env.AWTY_DRY_RUN;
+  const res = spawnSync(RUN, ['--tool', 'agy', '--event', 'PreToolUse'], { input: JSON.stringify(raw), encoding: 'utf8', env });
+  assert.equal(res.status, 0);
+  assert.equal(res.stdout, '');
+});

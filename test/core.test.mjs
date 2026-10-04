@@ -2,7 +2,8 @@ import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { tmpHome } from './helpers.mjs';
 import { writeJson } from '../lib/jsonfile.mjs';
-import { globalConfigPath } from '../lib/paths.mjs';
+import fs from 'node:fs';
+import { globalConfigPath, sessionPath } from '../lib/paths.mjs';
 import { loadState, saveState } from '../lib/state.mjs';
 import { handle, stateKey } from '../lib/hook.mjs';
 import { parseHookArgs, prepareHook } from '../lib/entry.mjs';
@@ -82,4 +83,26 @@ test('prepareHook ignores unknown tools and bad JSON without throwing', () => {
 test('prepareHook runs a claude /awty prompt to block JSON', () => {
   const r = prepareHook({ tool: 'claude', stdin: JSON.stringify({ session_id: 's9', cwd: '/x', hook_event_name: 'UserPromptSubmit', prompt: '/awty' }) });
   assert.equal(JSON.parse(r.out).decision, 'block');
+});
+
+test('codex /awty errors show the command word without a slash', () => {
+  const stdin = JSON.stringify({ session_id: 'c1', cwd: '/x', hook_event_name: 'UserPromptSubmit', prompt: 'awty min=abc' });
+  const codex = JSON.parse(prepareHook({ tool: 'codex', stdin }).out);
+  assert.match(codex.reason, /Usage: awty \[global/);
+  const claude = JSON.parse(prepareHook({ tool: 'claude', stdin: stdin.replace('awty min', '/awty min') }).out);
+  assert.match(claude.reason, /Usage: \/awty \[global/);
+});
+
+test('test command tells Codex users to run awty (no slash) again', () => {
+  const stdin = JSON.stringify({ session_id: 'c2', cwd: '/x', hook_event_name: 'UserPromptSubmit', prompt: 'awty test' });
+  assert.match(JSON.parse(prepareHook({ tool: 'codex', stdin }).out).reason, /Run awty again in a few seconds/);
+});
+
+test('a new session on a tool without prompt events prunes old session files', () => {
+  saveState('codex:old', { turnStartedAt: 1 });
+  const p = sessionPath('codex:old');
+  const longAgo = new Date(Date.now() - 30 * 86400_000);
+  fs.utimesSync(p, longAgo, longAgo);
+  handle(ev({ type: 'done', text: 'ok', sessionId: 'fresh', turnStartedAt: Date.now() - 600_000 }), { idle: noIdle });
+  assert.equal(fs.existsSync(p), false);
 });

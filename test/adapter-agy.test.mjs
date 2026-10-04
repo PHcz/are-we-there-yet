@@ -74,3 +74,13 @@ test('done job is named "Antigravity · demo · <first prompt>"', () => {
   assert.equal(r.job.sessionName, 'Antigravity · demo · create a file hello4.txt containing hi');
   assert.equal(r.job.durationSec, 73);
 });
+
+test('questions without text and empty permission requests are not notifications', () => {
+  const base = { conversationId: 'c1', workspacePaths: ['/x'] };
+  const ask = (args) => agy.normalize({ ...base, toolCall: { name: 'ask_question', args } }, { event: 'PreToolUse' });
+  assert.equal(ask({ questions: [{ options: ['a'] }] }), null);
+  assert.equal(ask({ questions: [] }), null);
+  assert.equal(ask({}), null);
+  assert.equal(ask({ questions: [{ question: '  ' }, { question: 'Real?' }] }).text, 'Real?');
+  assert.equal(agy.normalize({ ...base, toolCall: { name: 'ask_permission', args: {} } }, { event: 'PreToolUse' }), null);
+});

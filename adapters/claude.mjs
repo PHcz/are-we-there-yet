@@ -1,5 +1,6 @@
 export const name = 'claude';
 export const label = '';
+export const commandWord = '/awty';
 
 const WAITING_TYPES = new Set(['permission_prompt', 'elicitation_dialog', 'agent_needs_input']);
 
