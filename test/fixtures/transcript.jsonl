@@ -1,0 +1,9 @@
+{"type":"user","message":{"role":"user","content":"<command-name>/clear</command-name>"}}
+{"type":"user","isMeta":true,"message":{"role":"user","content":[{"type":"text","text":"meta stuff"}]}}
+{"type":"user","message":{"role":"user","content":"Refactor the auth middleware to use JWT rotation please"}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Looking at the middleware."},{"type":"tool_use","name":"Read","input":{}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"file body"}]}}
+{"type":"custom-title","customTitle":"Old title","sessionId":"abc"}
+this line is not json
+{"type":"custom-title","customTitle":"auth refactor","sessionId":"abc"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done. JWT rotation is in place and **all 42 tests** pass."}]}}
