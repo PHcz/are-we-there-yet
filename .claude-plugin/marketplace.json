@@ -6,7 +6,7 @@
     {
       "name": "are-we-there-yet",
       "source": "./",
-      "description": "Notify me when Claude Code is waiting or done"
+      "description": "Pings you when Claude Code is waiting for you or done"
     }
   ]
 }

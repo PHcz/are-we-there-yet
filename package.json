@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Claude Code plugin: notify me when a session is waiting or done",
+  "description": "Claude Code plugin: pings you when a session is waiting for you or done",
   "scripts": { "test": "node --test \"test/*.test.mjs\"" },
   "engines": { "node": ">=20" }
 }
