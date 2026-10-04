@@ -1,6 +1,13 @@
 # are-we-there-yet
 
-A Claude Code plugin that messages you when a session **is waiting for you** (an `AskUserQuestion` question, a permission prompt or an elicitation dialog) or **has finished a task**. Each message carries the session name and a short summary.
+**Get pinged on your phone when Claude Code needs you.**
+
+A Claude Code plugin that sends you a message when a session:
+
+- **is waiting for you**: Claude asked a question, or needs permission to run something
+- **has finished a task** and handed control back
+
+Each message shows which session it's from and what happened, so you can walk away from long tasks and come back at the right moment.
 
 ```
 ✅ [auth refactor] Done · 4m12s
@@ -8,84 +15,86 @@ JWT rotation is in place and all 42 tests pass.
 📁 ~/code/api · 14:32
 ```
 
-## Install
+```
+❓ [auth refactor] Waiting for you
+Which database should the session store use? (Postgres / SQLite)
+📁 ~/code/api · 14:40
+```
+
+Works with **Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assistant and macOS notifications**. Through [Apprise](https://github.com/caronc/apprise) it also reaches 170+ other services, including SMS, Signal, Matrix and email.
+
+---
+
+## Quick start
+
+**1. Install** (needs Node.js 20 or newer):
 
 ```bash
-claude plugin marketplace add "/path/to/are-we-there-yet"
+claude plugin marketplace add PHcz/are-we-there-yet
+```
+
+```bash
 claude plugin install are-we-there-yet@are-we-there-yet-local
 ```
 
-To try it without installing: `claude --plugin-dir /path/to/are-we-there-yet`. Requires Node.js ≥ 20.
+Or install from a local clone:
 
-## Configure
-
-Layers, later wins: built-in defaults → `~/.config/are-we-there-yet/config.json` → `<project>/.claude/awty.json` → per-session `/awty` overrides.
-
-```json
-{
-  "channels": ["telegram", "macos"],
-  "events": { "done": true, "waiting": true },
-  "filters": { "always": false, "minDurationSec": 60, "onlyWhenAwaySec": 0, "debounceSec": 0 },
-  "summary": { "mode": "last-message", "maxChars": 300 },
-  "telegram": { "botToken": "env:TELEGRAM_BOT_TOKEN", "chatId": "123456789" }
-}
+```bash
+git clone https://github.com/PHcz/are-we-there-yet.git ~/are-we-there-yet
+claude plugin marketplace add ~/are-we-there-yet
+claude plugin install are-we-there-yet@are-we-there-yet-local
 ```
 
-Defaults: `channels` is `["macos"]` (only macOS notifications are on until you configure another channel), both events on, `summary` is `last-message` with `maxChars` 300. Waiting alerts fire for `AskUserQuestion` questions and permission/elicitation prompts; finished turns are reported by the Done alert.
+**2. Start a new Claude Code session** (or type `/reload-plugins` in a running one).
 
-Secrets can be `env:VAR` or `keychain:<service>` (macOS: `security add-generic-password -s <service> -a "$USER" -w <token>`).
-
-### Filters
-
-| Key | Default | Effect |
-|---|---|---|
-| `filters.minDurationSec` | 60 | Only notify "done" if the turn took at least N seconds |
-| `filters.onlyWhenAwaySec` | 0 (off) | Skip if you touched the keyboard/mouse in the last N seconds (macOS) |
-| `filters.debounceSec` | 0 (off) | At most one "done" per session per N seconds |
-| `filters.always` | false | Ignore the three filters above for "done" |
-
-Scoping: `minDurationSec` and `debounceSec` apply to Done only (debounce counts only previous Done messages). `onlyWhenAwaySec` applies to both Done and waiting alerts. `always` bypasses the three filters for Done only. Waiting alerts always use the last-message summary.
-
-### `/awty` in any session
+**3. Send a test message:**
 
 ```
-/awty                       show effective settings and last error
-/awty off | on              this session only
-/awty channel=pushover,macos min=300 away=120
-/awty done=off waiting=on   enable/disable each event (on|off)
-/awty debounce=60 always=on at most one Done per 60 s; always=on bypasses filters for Done
-/awty max=200               summary length in characters
-/awty channels=telegram     alias of channel=
-/awty summary=llm           one-line Haiku summary instead of Claude's last message
-/awty name="auth refactor"  name used in messages
-/awty reset                 drop this session's overrides
-/awty test                  send a test message now
-/awty global channel=telegram    write to global config
-/awty project min=0              write to <project>/.claude/awty.json
+/awty test
 ```
 
-## Channels
+Out of the box only **macOS notifications** are on. To get messages on your phone, set up a channel. Telegram takes about five minutes: see [Telegram setup](docs/channels.md#telegram).
 
-| Channel | Keys |
+---
+
+## The `/awty` command
+
+Type `/awty` in any session to see or change settings. The plugin handles the command itself, so it never reaches Claude and costs no tokens.
+
+| Command | What it does |
 |---|---|
-| `telegram` | `botToken`, `chatId` — create a bot with @BotFather, message it, get chat id from `https://api.telegram.org/bot<token>/getUpdates` |
-| `ntfy` | `topic`, `server?` (default https://ntfy.sh), `token?`, `priority?`, `waitingPriority?` |
-| `slack` | `webhookUrl` |
-| `discord` | `webhookUrl` |
-| `macos` | `sound?` (e.g. `Glass`) |
-| `pushover` | `token`, `user`, `priority?`, `waitingPriority?` (2 = repeat until acknowledged) |
-| `bark` | `key`, `server?`, `level?`, `waitingLevel?` (`timeSensitive` / `critical`) |
-| `gotify` | `server`, `token`, `priority?`, `waitingPriority?` |
-| `homeassistant` | `url`, `token`, `service` (e.g. `mobile_app_iphone`) |
-| `apprise` | `config?` (path to apprise YAML), `urls?` — covers 170+ services (SMS, Signal, Matrix, email…). Install: `uv tool install apprise` |
+| `/awty` | Show current settings and the last error |
+| `/awty test` | Send a test message to every channel |
+| `/awty off` / `/awty on` | Mute or unmute this session |
+| `/awty name="auth refactor"` | Name this session in messages |
+| `/awty min=300` | Only report "Done" for tasks longer than 5 minutes |
+| `/awty away=120` | Only notify if you've been away from the keyboard for 2+ minutes (macOS) |
+| `/awty channel=telegram,macos` | Choose where messages go |
+| `/awty summary=llm` | One-line AI summary instead of Claude's last message |
+| `/awty reset` | Drop this session's overrides |
+| `/awty global …` | Save settings for all sessions, e.g. `/awty global channel=telegram` |
+| `/awty project …` | Save settings for this project only |
 
-## Troubleshooting
+Full list: [Configuration → `/awty` reference](docs/configuration.md#awty-command-reference).
 
-- `/awty` shows the last error; full log at `~/.config/are-we-there-yet/error.log`.
-- Dry run a hook (prints what would be sent, touches nothing real):
+---
 
-  ```bash
-  echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"Stop\",\"last_assistant_message\":\"hi\"}" | AWTY_HOME=$(mktemp -d) AWTY_SYNC=1 AWTY_DRY_RUN=1 bin/run.sh
-  ```
+## Documentation
 
-- Run tests: `npm test`
+| Guide | What's in it |
+|---|---|
+| [Channels](docs/channels.md) | Step-by-step setup for each service: Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assistant, macOS, Apprise |
+| [Configuration](docs/configuration.md) | Config files, every setting and its default, filters, secrets, the full `/awty` grammar |
+| [How it works](docs/how-it-works.md) | Which Claude Code events trigger messages, how names and summaries are chosen, where data is stored |
+| [Troubleshooting](docs/troubleshooting.md) | Nothing arrives, duplicate messages, errors and how to fix them |
+
+---
+
+## Development
+
+```bash
+npm test          # 81 tests, no dependencies to install
+claude --plugin-dir .   # run Claude Code with your working copy of the plugin
+```
+
+
