@@ -36,7 +36,7 @@ test('Stop that is not fully idle is ignored', () => {
 test('ask_question becomes a question with options', () => {
   const e = agy.normalize(fx('pre-tool-use-ask-question'), { event: 'PreToolUse' });
   assert.equal(e.type, 'question');
-  assert.equal(e.text, 'What is your favourite colour? (Blue / Red / Green / Purple / Yellow)');
+  assert.equal(e.text, 'What is your favourite colour?\n• Blue\n• Red\n• Green\n• Purple\n• Yellow');
 });
 
 test('ask_permission becomes a question with reason and target', () => {

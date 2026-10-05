@@ -6,11 +6,8 @@ const WAITING_TYPES = new Set(['permission_prompt', 'elicitation_dialog', 'agent
 
 function questionText(toolInput) {
   return (toolInput?.questions ?? [])
-    .map((q) => {
-      const labels = (q.options ?? []).map((o) => o.label).filter(Boolean);
-      return labels.length ? `${q.question} (${labels.join(' / ')})` : q.question;
-    })
-    .join(' · ');
+    .map((q) => [q.question, ...(q.options ?? []).map((o) => o.label).filter(Boolean).map((l) => `• ${l}`)].join('\n'))
+    .join('\n\n');
 }
 
 export function normalize(raw) {
