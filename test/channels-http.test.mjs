@@ -84,7 +84,7 @@ test('slack and discord send their native cards', async () => {
   await slack.send(done, { webhookUrl: `${base}/slack` });
   assert.deepEqual(json(), { text: '✅ *Done* · 1m 00s\n*s*\n\n> All good\n\n_x · 10:00_' });
   await discord.send(done, { webhookUrl: `${base}/discord` });
-  assert.deepEqual(json(), { content: '✅ **Done** · 1m 00s\n**s**\n\n> All good\n\n*x · 10:00*' });
+  assert.deepEqual(json(), { content: '✅ **Done** · 1m 00s\n**s**\n\n> All good\n\n*x · 10:00*', allowed_mentions: { parse: [] } });
 });
 
 test('pushover form with emergency priority for waiting', async () => {
