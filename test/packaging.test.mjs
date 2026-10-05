@@ -50,7 +50,6 @@ test('npm pack ships runtime files and no tests', () => {
   const files = JSON.parse(res.stdout)[0].files.map((f) => f.path);
   for (const f of ['bin/run.sh', 'bin/awty.mjs', 'adapters/agy.mjs', 'lib/install.mjs', 'hooks/hooks.json', 'docs/tools.md', 'LICENSE']) assert.ok(files.includes(f), f);
   assert.ok(!files.some((f) => f.startsWith('test/')));
-
 });
 
 test('bin scripts are executable', () => {

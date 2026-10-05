@@ -98,5 +98,3 @@ Full list: [Configuration → `/awty` reference](docs/configuration.md#awty-comm
 npm test          # all tests, no dependencies to install
 claude --plugin-dir .   # run Claude Code with your working copy of the plugin
 ```
-
-
