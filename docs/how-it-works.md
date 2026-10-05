@@ -34,7 +34,7 @@ api · 14:32                              ← project folder and time
 2. the session title, if you named the session with `/rename`
 3. `<project folder> · <first 6 words of your first message>`
 
-**Summary**: Claude's last message, or for waiting alerts the question or permission text. Optionally it can be a one-line AI summary; see [Summaries](configuration.md#summaries). For questions, the summary shows the question followed by `• option` lines (up to 8 lines and 300 characters total).
+**Summary**: Claude's last message, or for waiting alerts the question or permission text. Optionally it can be a one-line AI summary; see [Summaries](configuration.md#summaries). For questions, the summary shows the question followed by `• option` lines. Every summary is limited to 8 lines and `summary.maxChars` characters (300 by default).
 
 Telegram (HTML), Slack and Discord get the formatted card. Push channels get the title "✅ Done · 4m 12s · auth refactor (Codex)" and the summary plus "api · 14:32" as the body. If Telegram ever rejects the formatting, the same message is resent as plain text.
 

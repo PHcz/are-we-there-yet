@@ -20,7 +20,7 @@ auth refactor · Codex
 api · 14:32
 ```
 
-Telegram, Slack and Discord show this as a formatted card; push apps (ntfy, Pushover, macOS…) show the first line as the title and the rest as the body.
+Telegram, Slack and Discord show this as a formatted card; push apps (ntfy, Pushover, macOS…) get a one-line title (status, duration, session) with the summary as the body.
 
 Works with **Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assistant and macOS notifications**. Through [Apprise](https://github.com/caronc/apprise) it also reaches 170+ other services, including SMS, Signal, Matrix and email.
 
