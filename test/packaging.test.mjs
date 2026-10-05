@@ -38,7 +38,8 @@ import { fileURLToPath } from 'node:url';
 test('package.json declares the awty bin and publishable files', () => {
   const p = read('package.json');
   assert.equal(p.name, '@phcz/are-we-there-yet');
-  assert.equal(p.private, undefined);
+  assert.equal(p.private, true, 'kept private until we decide to publish');
+  assert.equal(p.publishConfig, undefined);
   assert.equal(p.bin.awty, 'bin/awty.mjs');
   for (const f of ['bin', 'lib', 'channels', 'adapters', 'hooks', 'commands', '.claude-plugin']) assert.ok(p.files.includes(f), f);
   assert.equal(read('.claude-plugin/plugin.json').version, p.version);

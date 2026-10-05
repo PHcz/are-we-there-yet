@@ -54,7 +54,8 @@ Only are-we-there-yet's own entries are removed. Before its first change to a fi
 
 ## Upgrading and uninstalling
 
-- After `npm update -g @phcz/are-we-there-yet`, re-run `awty install <tool>` for each tool you use. This refreshes the hook paths and updates the Claude Code plugin.
-- Before `npm uninstall -g @phcz/are-we-there-yet`, run `awty uninstall codex`, `awty uninstall agy` and `awty uninstall claude`. Otherwise the hooks stay behind pointing at a file that no longer exists.
+- **Update:** run `npm install -g github:PHcz/are-we-there-yet` again (or `git pull` in your clone), then re-run `awty install <tool>` for each tool you use. This refreshes the hook paths and updates the Claude Code plugin.
+- **Claude Code keeps a cached copy of the plugin** and only refreshes it when the version number changes. If Claude doesn't pick up a change, run `awty uninstall claude && awty install claude`.
+- **Remove:** before `npm uninstall -g @phcz/are-we-there-yet` (or deleting your clone and running `npm unlink -g @phcz/are-we-there-yet`), run `awty uninstall codex`, `awty uninstall agy` and `awty uninstall claude`. Otherwise the hooks stay behind pointing at a file that no longer exists.
 - After switching Node versions with nvm or Volta, re-run `awty install …` for each tool, because the package may now live in a different folder.
 - `awty status` marks hooks whose path is out of date as `installed (stale path — re-run awty install <tool>)`.

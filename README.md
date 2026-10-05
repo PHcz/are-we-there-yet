@@ -27,10 +27,17 @@ Works with **Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assist
 
 ## Quick start
 
-**1. Install** (needs Node.js 20 or newer):
+**1. Install** (needs Node.js 20 or newer). are-we-there-yet isn't on npm yet; install it straight from GitHub. The repository is private for now, so you need access to it:
 
 ```bash
-npm install -g @phcz/are-we-there-yet
+npm install -g github:PHcz/are-we-there-yet
+```
+
+Or work from a clone, so local edits take effect immediately:
+
+```bash
+git clone https://github.com/PHcz/are-we-there-yet.git ~/are-we-there-yet
+cd ~/are-we-there-yet && npm link
 ```
 
 **2. Connect your tools** (any or all):
@@ -43,7 +50,7 @@ awty install agy       # Google Antigravity CLI
 
 **3. Send a test message:** `awty test`
 
-After `npm update -g @phcz/are-we-there-yet`, re-run `awty install <tool>` for each tool. Before `npm uninstall -g`, run `awty uninstall <tool>` first. Details: [Upgrading and uninstalling](docs/tools.md#upgrading-and-uninstalling).
+To update, run the install command again (or `git pull` in your clone), then re-run `awty install <tool>` for each tool. Before removing awty, run `awty uninstall <tool>` first. Details: [Upgrading and uninstalling](docs/tools.md#upgrading-and-uninstalling).
 
 Out of the box only **macOS notifications** are on. To get messages on your phone, set up a channel. Telegram takes about five minutes: see [Telegram setup](docs/channels.md#telegram).
 
