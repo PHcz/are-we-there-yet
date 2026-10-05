@@ -10,16 +10,17 @@ It sends you a message when a session:
 Each message shows which session it's from and what happened, so you can walk away from long tasks and come back at the right moment.
 
 ```
-✅ [auth refactor] Done · 4m12s
-JWT rotation is in place and all 42 tests pass.
-📁 ~/code/api · 14:32
+✅ Done · 4m 12s
+auth refactor · Codex
+
+┃ JWT rotation is in place.
+┃ • all 42 tests pass
+┃ • updated README
+
+api · 14:32
 ```
 
-```
-❓ [auth refactor] Waiting for you
-Which database should the session store use? (Postgres / SQLite)
-📁 ~/code/api · 14:40
-```
+Telegram, Slack and Discord show this as a formatted card; push apps (ntfy, Pushover, macOS…) get a one-line title (status, duration, session) with the summary as the body.
 
 Works with **Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assistant and macOS notifications**. Through [Apprise](https://github.com/caronc/apprise) it also reaches 170+ other services, including SMS, Signal, Matrix and email.
 

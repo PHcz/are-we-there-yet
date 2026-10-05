@@ -76,7 +76,7 @@ test('awty test sends through the dispatcher (dry run)', () => {
   writeJson(globalConfigPath(), { channels: ['telegram'] });
   const res = spawnSync(AWTY, ['test'], { encoding: 'utf8', env: { ...process.env, AWTY_DRY_RUN: '1' } });
   assert.equal(res.status, 0);
-  assert.match(res.stdout, /"title":"🔔 \[awty test\] Test notification"/);
+  assert.match(res.stdout, /"title":"🔔 Test notification · awty test"/);
   assert.match(res.stdout, /Sent: telegram/);
 });
 

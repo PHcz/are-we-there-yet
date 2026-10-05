@@ -72,7 +72,7 @@ If you were sent a Waiting message during a task, its Done message is always sen
 
 ### Summaries
 
-- **`last-message`** (default) uses Claude's final message for Done, and the question text or permission request for Waiting. Markdown is stripped, code blocks become `[code]`, and the text is cut to `maxChars` at a word boundary.
+- **`last-message`** (default) uses Claude's final message for Done, and the question text or permission request for Waiting. Line breaks, paragraphs and bullets are kept (bullets show as `•`). Markdown styling is removed, code blocks become `[code]`, and the summary is limited to 8 non-empty lines and `maxChars` characters, ending in `…` when cut.
 - **`llm`** asks `claude -p --model haiku` for one sentence based on the end of the conversation. It adds a few seconds and a small API cost per Done message. If it fails or takes more than 15 seconds, the plugin falls back to `last-message`. Waiting messages always use `last-message`.
 
 ## Storing secrets

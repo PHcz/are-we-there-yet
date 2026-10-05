@@ -27,8 +27,8 @@ test('Stop hook end-to-end prints dry-run message', () => {
   assert.equal(res.status, 0);
   const lines = res.stdout.trim().split('\n').map((l) => JSON.parse(l));
   assert.deepEqual(lines.map((l) => l.channel).sort(), ['ntfy', 'telegram']);
-  assert.match(lines[0].title, /^✅ \[auth refactor\] Done · 1m3\ds$/);
-  assert.match(lines[0].body, /^Shipped it\n📁 \/x\/api · \d\d:\d\d$/);
+  assert.match(lines[0].title, /^✅ Done · 1m 3\ds · auth refactor$/);
+  assert.match(lines[0].body, /^Shipped it\n\napi · \d\d:\d\d$/);
 });
 
 test('/awty prompt prints block JSON', () => {
@@ -59,7 +59,7 @@ test('Codex Stop through run.sh --tool codex prints a labelled dry-run message',
   });
   assert.equal(res.status, 0);
   const line = JSON.parse(res.stdout.trim().split('\n')[0]);
-  assert.equal(line.title, '✅ [Codex · Create hello3.txt] Done');
+  assert.equal(line.title, '✅ Done · Create hello3.txt (Codex)');
   assert.match(line.body, /^Created hello3\.txt containing hi\./);
 });
 
@@ -76,7 +76,7 @@ test('Antigravity Stop through run.sh --tool agy --event Stop prints a dry-run m
   assert.equal(res.status, 0);
   const lines = res.stdout.trim().split('\n').map((l) => JSON.parse(l));
   assert.equal(lines.length, 1);
-  assert.match(lines[0].title, /^✅ \[Antigravity · demo · create a file hello4\.txt containing hi\] Done/);
+  assert.match(lines[0].title, /^✅ Done · .+ · demo · create a file hello4\.txt containing hi \(Antigravity\)$/);
   assert.equal(lines[0].decision, undefined);
 });
 

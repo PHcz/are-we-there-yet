@@ -29,11 +29,12 @@ test('prompt events record turn start under the namespaced key', () => {
   assert.equal(loadState('codex:abc').firstPrompt, 'fix login bug');
 });
 
-test('done without transcript uses event text, label and title', () => {
+test('done without transcript uses event text and title, with the tool label kept separate', () => {
   saveState('codex:abc', { turnStartedAt: NOW - 90_000 });
   const r = handle(ev({ type: 'done', text: 'All green', title: 'Fix login' }), { now: NOW, idle: noIdle, label: 'Codex' });
   assert.equal(r.job.kind, 'done');
-  assert.equal(r.job.sessionName, 'Codex · Fix login');
+  assert.equal(r.job.sessionName, 'Fix login');
+  assert.equal(r.job.tool, 'Codex');
   assert.equal(r.job.summaryInput.text, 'All green');
   assert.equal(r.job.summaryInput.transcriptPath, undefined);
   assert.equal(r.job.durationSec, 90);
@@ -41,7 +42,8 @@ test('done without transcript uses event text, label and title', () => {
 
 test('falls back to project · first prompt from the event when there is no title', () => {
   const r = handle(ev({ type: 'done', text: 'ok', firstPrompt: 'create a file hello4.txt containing hi please', turnStartedAt: NOW - 120_000 }), { now: NOW, idle: noIdle, label: 'Antigravity' });
-  assert.equal(r.job.sessionName, 'Antigravity · api · create a file hello4.txt containing hi…');
+  assert.equal(r.job.sessionName, 'api · create a file hello4.txt containing hi…');
+  assert.equal(r.job.tool, 'Antigravity');
   assert.equal(r.job.durationSec, 120);
   assert.equal(loadState('codex:abc').firstPrompt, 'create a file hello4.txt containing hi please');
 });
@@ -50,10 +52,10 @@ test('event turnStartedAt drives the min-duration filter', () => {
   assert.deepEqual(handle(ev({ type: 'done', text: 'ok', turnStartedAt: NOW - 5_000 }), { now: NOW, idle: noIdle }), {});
 });
 
-test('/awty override name gets the label prefix', () => {
+test('/awty override name is used as the session name without a label prefix', () => {
   saveState('codex:abc', { override: { name: 'auth' }, turnStartedAt: NOW - 90_000 });
   const r = handle(ev({ type: 'done', text: 'ok', title: 'ignored' }), { now: NOW, idle: noIdle, label: 'Codex' });
-  assert.equal(r.job.sessionName, 'Codex · auth');
+  assert.equal(r.job.sessionName, 'auth');
 });
 
 test('question and waiting events produce waiting jobs', () => {

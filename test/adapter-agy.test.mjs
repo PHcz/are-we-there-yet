@@ -36,7 +36,7 @@ test('Stop that is not fully idle is ignored', () => {
 test('ask_question becomes a question with options', () => {
   const e = agy.normalize(fx('pre-tool-use-ask-question'), { event: 'PreToolUse' });
   assert.equal(e.type, 'question');
-  assert.equal(e.text, 'What is your favourite colour? (Blue / Red / Green / Purple / Yellow)');
+  assert.equal(e.text, 'What is your favourite colour?\n• Blue\n• Red\n• Green\n• Purple\n• Yellow');
 });
 
 test('ask_permission becomes a question with reason and target', () => {
@@ -71,7 +71,8 @@ test('respond never prints anything, even for a block', () => {
 
 test('done job is named "Antigravity · demo · <first prompt>"', () => {
   const r = handle(agy.normalize(fx('stop'), { event: 'Stop' }), { now: Date.parse('2026-10-04T15:41:00Z'), idle: () => null, label: agy.label });
-  assert.equal(r.job.sessionName, 'Antigravity · demo · create a file hello4.txt containing hi');
+  assert.equal(r.job.sessionName, 'demo · create a file hello4.txt containing hi');
+  assert.equal(r.job.tool, 'Antigravity');
   assert.equal(r.job.durationSec, 73);
 });
 

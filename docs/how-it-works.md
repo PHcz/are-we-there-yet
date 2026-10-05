@@ -18,9 +18,14 @@ Claude Code also sends an "idle" notification about a minute after every finishe
 ## What a message contains
 
 ```
-✅ [auth refactor] Done · 4m12s          ← icon, session name, duration
-JWT rotation is in place and all…        ← summary
-📁 ~/code/api · 14:32                    ← project folder and time
+✅ Done · 4m 12s                         ← status and duration
+auth refactor · Codex                    ← session name and tool
+
+┃ JWT rotation is in place.              ← summary with line breaks
+┃ • all 42 tests pass                       and bullets kept
+┃ • updated README
+
+api · 14:32                              ← project folder and time
 ```
 
 **Session name**, first match wins:
@@ -29,9 +34,9 @@ JWT rotation is in place and all…        ← summary
 2. the session title, if you named the session with `/rename`
 3. `<project folder> · <first 6 words of your first message>`
 
-**Summary**: Claude's last message, or for waiting alerts the question or permission text. Optionally it can be a one-line AI summary; see [Summaries](configuration.md#summaries).
+**Summary**: Claude's last message, or for waiting alerts the question or permission text. Optionally it can be a one-line AI summary; see [Summaries](configuration.md#summaries). For questions, the summary shows the question followed by `• option` lines. Every summary is limited to 8 lines and `summary.maxChars` characters (300 by default).
 
-Chat channels (Telegram, Slack, Discord) receive the whole block as one message. Push channels (ntfy, Pushover, Bark, Gotify, Home Assistant, macOS) get the first line as the notification title and the rest as its body.
+Telegram (HTML), Slack and Discord get the formatted card. Push channels get the title "✅ Done · 4m 12s · auth refactor (Codex)" and the summary plus "api · 14:32" as the body. If Telegram ever rejects the formatting, the same message is resent as plain text.
 
 ## Sending without slowing Claude down
 

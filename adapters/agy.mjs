@@ -40,9 +40,9 @@ function questionText(args) {
     .filter((q) => typeof q?.question === 'string' && q.question.trim())
     .map((q) => {
       const options = (q.options ?? []).map((o) => (typeof o === 'string' ? o : o?.label)).filter(Boolean);
-      return options.length ? `${q.question} (${options.join(' / ')})` : q.question;
+      return [q.question, ...options.map((o) => `• ${o}`)].join('\n');
     })
-    .join(' · ');
+    .join('\n\n');
 }
 
 function permissionText(args) {

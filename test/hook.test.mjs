@@ -87,7 +87,7 @@ test('PreToolUse AskUserQuestion sends waiting job with question and options', (
   }, { now: NOW, idle: noIdle });
   assert.equal(r.job.kind, 'waiting');
   assert.equal(r.job.waitingReason, 'question');
-  assert.equal(r.job.summaryInput.text, 'Which DB? (Postgres / SQLite)');
+  assert.equal(r.job.summaryInput.text, 'Which DB?\n• Postgres\n• SQLite');
   assert.equal(r.job.summaryInput.mode, 'last-message');
   assert.equal(loadState('s1').lastWaitingSentAt, NOW);
   assert.equal(r.stdout, undefined);
