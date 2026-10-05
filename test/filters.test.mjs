@@ -51,3 +51,10 @@ test('getIdleSeconds parses ioreg and degrades', () => {
   assert.equal(getIdleSeconds({ platform: 'linux', run: () => 'x' }), null);
   assert.equal(getIdleSeconds({ platform: 'darwin', run: () => { throw new Error('no'); } }), null);
 });
+
+test('a waiting alert during the turn lets the short Done through', () => {
+  const state = { turnStartedAt: NOW - 30_000, lastWaitingSentAt: NOW - 20_000 };
+  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: cfg(), state, now: NOW, idleSec: null }).ok, true);
+  const earlier = { turnStartedAt: NOW - 30_000, lastWaitingSentAt: NOW - 90_000 };
+  assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: cfg(), state: earlier, now: NOW, idleSec: null }).ok, false);
+});

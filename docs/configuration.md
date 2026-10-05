@@ -68,6 +68,8 @@ You don't need to restart anything after changing settings: they are re-read on 
 
 Waiting messages are urgent by nature, so they ignore the duration and debounce filters. If a "⏳ permission" alert would arrive within 2 minutes of a "❓ question" alert for the same session, it's dropped as a duplicate.
 
+If you were sent a Waiting message during a task, its Done message is always sent, however short the task was. You were probably away, so you'll want to know when it finished.
+
 ### Summaries
 
 - **`last-message`** (default) uses Claude's final message for Done, and the question text or permission request for Waiting. Markdown is stripped, code blocks become `[code]`, and the text is cut to `maxChars` at a word boundary.
@@ -134,7 +136,7 @@ Actions:
 
 | Command | Does |
 |---|---|
-| `/awty` | Show the effective settings and the last error |
+| `/awty` or `/awty status` | Show the effective settings and the last error |
 | `/awty test` | Send a test message to every enabled channel, ignoring filters and mute |
 | `/awty reset` | Remove this session's overrides (session scope only) |
 
