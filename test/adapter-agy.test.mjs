@@ -71,7 +71,8 @@ test('respond never prints anything, even for a block', () => {
 
 test('done job is named "Antigravity · demo · <first prompt>"', () => {
   const r = handle(agy.normalize(fx('stop'), { event: 'Stop' }), { now: Date.parse('2026-10-04T15:41:00Z'), idle: () => null, label: agy.label });
-  assert.equal(r.job.sessionName, 'Antigravity · demo · create a file hello4.txt containing hi');
+  assert.equal(r.job.sessionName, 'demo · create a file hello4.txt containing hi');
+  assert.equal(r.job.tool, 'Antigravity');
   assert.equal(r.job.durationSec, 73);
 });
 

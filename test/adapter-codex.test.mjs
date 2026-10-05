@@ -58,9 +58,10 @@ test('threadTitle takes the last matching index entry and tolerates a missing in
   assert.equal(codex.threadTitle('x'), undefined);
 });
 
-test('done job is named "Codex · <thread title>"', () => {
+test('done job is named after the thread title, with the Codex tool label', () => {
   const r = handle(codex.normalize(fx('stop')), { now: NOW, idle: () => null, label: codex.label });
-  assert.equal(r.job.sessionName, 'Codex · Create hello3.txt');
+  assert.equal(r.job.sessionName, 'Create hello3.txt');
+  assert.equal(r.job.tool, 'Codex');
 });
 
 test('respond prints nothing when there is no block', () => {

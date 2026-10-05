@@ -28,28 +28,34 @@ test('summarize llm mode uses runner and falls back on failure', async () => {
 
 test('formatDuration', () => {
   assert.equal(formatDuration(42), '42s');
-  assert.equal(formatDuration(252), '4m12s');
-  assert.equal(formatDuration(3720), '1h02m');
+  assert.equal(formatDuration(252), '4m 12s');
+  assert.equal(formatDuration(3720), '1h 02m');
 });
 
-test('formatMessage done', () => {
+test('formatMessage done returns structured fields and plain renderings', () => {
   const now = new Date(2026, 9, 4, 14, 32);
   const m = formatMessage({
-    kind: 'done', sessionName: 'auth refactor', durationSec: 252, summary: 'All good',
-    cwd: `${os.homedir()}/code/api`, now,
+    kind: 'done', sessionName: 'auth refactor', tool: 'Codex', durationSec: 252,
+    summary: 'All good\n• tests pass', cwd: `${os.homedir()}/code/api`, now,
   });
-  assert.equal(m.title, '✅ [auth refactor] Done · 4m12s');
-  assert.equal(m.body, 'All good\n📁 ~/code/api · 14:32');
+  assert.deepEqual(
+    { kind: m.kind, emoji: m.emoji, status: m.status, duration: m.duration, session: m.session, tool: m.tool, summary: m.summary, project: m.project, time: m.time },
+    { kind: 'done', emoji: '✅', status: 'Done', duration: '4m 12s', session: 'auth refactor', tool: 'Codex', summary: 'All good\n• tests pass', project: 'api', time: '14:32' },
+  );
+  assert.equal(m.title, '✅ Done · 4m 12s · auth refactor (Codex)');
+  assert.equal(m.body, 'All good\n• tests pass\n\napi · 14:32');
   assert.equal(m.text, `${m.title}\n${m.body}`);
-  assert.equal(m.kind, 'done');
 });
 
 test('formatMessage waiting and test variants', () => {
   const now = new Date(2026, 9, 4, 9, 5);
-  assert.equal(formatMessage({ kind: 'waiting', waitingReason: 'question', sessionName: 's', summary: 'q?', cwd: '/x', now }).title, '❓ [s] Waiting for you');
-  assert.equal(formatMessage({ kind: 'waiting', waitingReason: 'permission', sessionName: 's', summary: '', cwd: '/x', now }).body, '📁 /x · 09:05');
-  assert.equal(formatMessage({ kind: 'test', sessionName: 's', summary: 'hi', cwd: '/x', now }).title, '🔔 [s] Test notification');
-  assert.equal(formatMessage({ kind: 'done', sessionName: 's', durationSec: null, summary: 'x', cwd: '/x', now }).title, '✅ [s] Done');
+  assert.equal(formatMessage({ kind: 'waiting', waitingReason: 'question', sessionName: 's', summary: 'q?', cwd: '/x', now }).title, '❓ Waiting for you · s');
+  const p = formatMessage({ kind: 'waiting', waitingReason: 'permission', sessionName: 's', summary: '', cwd: '/x', now });
+  assert.equal(p.title, '⏳ Waiting for you · s');
+  assert.equal(p.body, 'x · 09:05');
+  assert.equal(p.duration, '');
+  assert.equal(formatMessage({ kind: 'test', sessionName: 's', summary: 'hi', cwd: '/x', now }).title, '🔔 Test notification · s');
+  assert.equal(formatMessage({ kind: 'done', sessionName: 's', durationSec: null, summary: 'x', cwd: '/x', now }).title, '✅ Done · s');
 });
 
 test('cleanSummary keeps paragraphs and bullets', () => {
