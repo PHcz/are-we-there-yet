@@ -80,3 +80,13 @@ test('cleanSummary keeps underscores in identifiers', () => {
 test('cleanSummary caps characters at a word boundary', () => {
   assert.equal(cleanSummary('one two three four five', { maxChars: 12 }), 'one two…');
 });
+
+test('cleanSummary never exceeds maxChars when the line cap also fires', () => {
+  const s = cleanSummary('aaaa\nbbbb\ncccc', { maxChars: 9, maxLines: 2 });
+  assert.ok(s.length <= 9, `${JSON.stringify(s)} is ${s.length} chars`);
+  assert.ok(s.endsWith('…'));
+});
+
+test('cleanSummary drops markdown table separator lines', () => {
+  assert.equal(cleanSummary('| a | b |\n|---|:--:|\n| 1 | 2 |', { maxChars: 300 }), '| a | b |\n| 1 | 2 |');
+});
