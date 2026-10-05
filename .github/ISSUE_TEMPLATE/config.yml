@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup help
+    url: https://github.com/PHcz/are-we-there-yet/blob/main/docs/troubleshooting.md
+    about: Most "nothing arrives" problems are covered in the troubleshooting guide.
