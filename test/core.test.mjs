@@ -132,3 +132,9 @@ test('a Done right after a Paused is not debounced', () => {
   const r = handle(ev({ type: 'done', text: 'All done' }), { now: NOW + 30_000, idle: noIdle });
   assert.equal(r.job.kind, 'done');
 });
+
+test('a task-notification wake-up does not reset the turn start', () => {
+  saveState('codex:abc', { turnStartedAt: NOW - 300_000, firstPrompt: 'run the build' });
+  assert.deepEqual(handle(ev({ type: 'prompt', prompt: '<task-notification>\n<task-id>x</task-id>\n</task-notification>' }), { now: NOW }), {});
+  assert.equal(loadState('codex:abc').turnStartedAt, NOW - 300_000);
+});
