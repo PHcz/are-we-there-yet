@@ -1,0 +1,5 @@
+{"type":"user","message":{"role":"user","content":"run the review and the tests"}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_A","name":"Agent","input":{"description":"Review Task 3 (spec + quality)","prompt":"…","run_in_background":true}},{"type":"tool_use","id":"toolu_B","name":"Bash","input":{"command":"npm test -- --reporter=dot","run_in_background":true}},{"type":"tool_use","id":"toolu_C","name":"Bash","input":{"command":"ls"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_A","content":"launched"}]}}
+{"type":"queue-operation","operation":"enqueue","content":"<task-notification>\n<task-id>x1</task-id>\n<tool-use-id>toolu_A</tool-use-id>\n<status>completed</status>\n</task-notification>"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"The review is in; tests are still running."}]}}

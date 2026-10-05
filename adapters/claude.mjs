@@ -1,3 +1,6 @@
+import { readTailLines } from '../lib/transcript.mjs';
+import { pendingBackgroundTasks } from '../lib/background.mjs';
+
 export const name = 'claude';
 export const label = '';
 export const commandWord = '/awty';
@@ -28,7 +31,9 @@ export function normalize(raw) {
       if (raw.notification_type && !WAITING_TYPES.has(raw.notification_type)) return null;
       return { ...base, type: 'waiting', text: raw.message ?? '' };
     case 'Stop':
-      return raw.stop_hook_active ? null : { ...base, type: 'done', text: raw.last_assistant_message || '' };
+      return raw.stop_hook_active
+        ? null
+        : { ...base, type: 'done', text: raw.last_assistant_message || '', background: pendingBackgroundTasks(readTailLines(raw.transcript_path)) };
     default:
       return null;
   }

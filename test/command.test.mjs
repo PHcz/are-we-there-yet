@@ -102,3 +102,9 @@ test('describeConfig lists channels but never secrets', () => {
 test('"status" is accepted as the status action', () => {
   assert.deepEqual(parseNotifyCommand('/awty status'), { scope: 'session', action: 'status', patch: {}, errors: [] });
 });
+
+test('paused=on|off sets events.paused and status shows it', () => {
+  assert.deepEqual(parseNotifyCommand('/awty paused=off').patch, { events: { paused: false } });
+  tmpHome();
+  assert.match(describeConfig(loadConfig({ cwd: '/tmp', sessionId: 'p' })), /paused=on/);
+});

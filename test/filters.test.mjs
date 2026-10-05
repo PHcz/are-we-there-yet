@@ -58,3 +58,10 @@ test('a waiting alert during the turn lets the short Done through', () => {
   const earlier = { turnStartedAt: NOW - 30_000, lastWaitingSentAt: NOW - 90_000 };
   assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: cfg(), state: earlier, now: NOW, idleSec: null }).ok, false);
 });
+
+test('paused obeys events.paused and min duration but not debounce', () => {
+  assert.equal(shouldNotify({ kind: 'paused', source: 'stop', cfg: cfg(), state: { turnStartedAt: NOW - 30_000 }, now: NOW, idleSec: null }).ok, false);
+  assert.equal(shouldNotify({ kind: 'paused', source: 'stop', cfg: cfg({ filters: { always: true } }), state: { turnStartedAt: NOW - 30_000 }, now: NOW, idleSec: null }).ok, true);
+  assert.equal(shouldNotify({ kind: 'paused', source: 'stop', cfg: cfg({ filters: { minDurationSec: 0, debounceSec: 600 } }), state: { lastDoneSentAt: NOW - 1000 }, now: NOW, idleSec: null }).ok, true);
+  assert.equal(shouldNotify({ kind: 'paused', source: 'stop', cfg: cfg({ events: { paused: false } }), state: {}, now: NOW, idleSec: null }).ok, false);
+});

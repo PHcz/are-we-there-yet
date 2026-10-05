@@ -3,6 +3,7 @@
 | | Claude Code | Codex CLI | Antigravity CLI |
 |---|---|---|---|
 | ✅ Done | ✔ | ✔ | ✔ |
+| ⏸ Paused (background tasks) | ✔ | — | — |
 | ❓ Agent asks you a question | ✔ | — (Codex has no question tool) | ✔ (`ask_question`, `ask_permission`) |
 | ⏳ Waiting for permission | ✔ | ✔ | — (not exposed by Antigravity; see below) |
 | Session name | your `/rename` title, else project · first prompt | Codex's automatic thread title | project · first prompt |

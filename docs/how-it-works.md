@@ -7,6 +7,7 @@ are-we-there-yet works with Claude Code, Codex CLI and Antigravity CLI. For each
 | Claude Code event (Codex and Antigravity: see [Supported tools](tools.md)) | Message | When |
 |---|---|---|
 | `Stop` | ✅ **Done** | Claude finished responding and handed control back to you |
+| `Stop` while background tasks still run | ⏸ **Paused** | Claude ended its turn but background jobs it started are still running; the list is shown, and ✅ Done follows when Claude finishes |
 | `PreToolUse` on `AskUserQuestion` | ❓ **Waiting for you** | Claude asked a multiple-choice question. Sent immediately, with the question and options. |
 | `Notification` (`permission_prompt`, `elicitation_dialog`, `agent_needs_input`) | ⏳ **Waiting for you** | Claude needs permission to run a tool, or an MCP server is asking for input |
 | `UserPromptSubmit` | — | Records when your request started, which is used for the "took 4m12s" duration, and handles `/awty` commands |

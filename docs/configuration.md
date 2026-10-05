@@ -47,6 +47,7 @@ You don't need to restart anything after changing settings: they are re-read on 
 | `channels` | `["macos"]` | Where messages go. See [Channels](channels.md). |
 | `events.done` | `true` | Send "✅ Done" when a task finishes |
 | `events.waiting` | `true` | Send "❓/⏳ Waiting for you" when Claude asks a question or needs permission |
+| `events.paused` | `true` | Send "⏸ Paused" when Claude Code stops while background tasks are still running |
 | `filters.minDurationSec` | `60` | Only send Done if the task took at least this many seconds |
 | `filters.onlyWhenAwaySec` | `0` (off) | Only send if your Mac has had no keyboard or mouse input for this many seconds |
 | `filters.debounceSec` | `0` (off) | At most one Done per session in this many seconds |
@@ -65,6 +66,8 @@ You don't need to restart anything after changing settings: they are re-read on 
 | `debounceSec` (counts only previous Done messages) | ✔ | — |
 | `onlyWhenAwaySec` | ✔ (skipped when `always` is on) | ✔ |
 | `always` | bypasses the three above | — |
+
+⏸ Paused follows the same rules as Done, except the debounce (it neither counts toward nor is blocked by `debounceSec`).
 
 Waiting messages are urgent by nature, so they ignore the duration and debounce filters. If a "⏳ permission" alert would arrive within 2 minutes of a "❓ question" alert for the same session, it's dropped as a duplicate.
 
@@ -115,6 +118,7 @@ With no scope word, changes apply to **this session only**. `global` writes to `
 | `on` / `off` | `enabled` |
 | `done=on\|off` | `events.done` |
 | `waiting=on\|off` | `events.waiting` |
+| `paused=on\|off` | `events.paused` |
 | `channel=a,b` (or `channels=a,b`) | `channels` |
 | `min=N` | `filters.minDurationSec` |
 | `away=N` | `filters.onlyWhenAwaySec` |
