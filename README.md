@@ -1,8 +1,8 @@
 # are-we-there-yet
 
-**Get pinged on your phone when Claude Code needs you.**
+**Get pinged on your phone when your AI coding agent needs you.** Works with **Claude Code**, **OpenAI Codex CLI** and **Google Antigravity CLI**.
 
-A Claude Code plugin that sends you a message when a session:
+It sends you a message when a session:
 
 - **is waiting for you**: Claude asked a question, or needs permission to run something
 - **has finished a task** and handed control back
@@ -30,28 +30,20 @@ Works with **Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assist
 **1. Install** (needs Node.js 20 or newer):
 
 ```bash
-claude plugin marketplace add PHcz/are-we-there-yet
+npm install -g @phcz/are-we-there-yet
 ```
+
+**2. Connect your tools** (any or all):
 
 ```bash
-claude plugin install are-we-there-yet@are-we-there-yet-local
+awty install claude    # Claude Code
+awty install codex     # OpenAI Codex CLI — then approve the hooks in Codex
+awty install agy       # Google Antigravity CLI
 ```
 
-Or install from a local clone:
+**3. Send a test message:** `awty test`
 
-```bash
-git clone https://github.com/PHcz/are-we-there-yet.git ~/are-we-there-yet
-claude plugin marketplace add ~/are-we-there-yet
-claude plugin install are-we-there-yet@are-we-there-yet-local
-```
-
-**2. Start a new Claude Code session** (or type `/reload-plugins` in a running one).
-
-**3. Send a test message:**
-
-```
-/awty test
-```
+After `npm update -g @phcz/are-we-there-yet`, re-run `awty install <tool>` for each tool. Before `npm uninstall -g`, run `awty uninstall <tool>` first. Details: [Upgrading and uninstalling](docs/tools.md#upgrading-and-uninstalling).
 
 Out of the box only **macOS notifications** are on. To get messages on your phone, set up a channel. Telegram takes about five minutes: see [Telegram setup](docs/channels.md#telegram).
 
@@ -75,6 +67,8 @@ Type `/awty` in any session to see or change settings. The plugin handles the co
 | `/awty global …` | Save settings for all sessions, e.g. `/awty global channel=telegram` |
 | `/awty project …` | Save settings for this project only |
 
+In Codex type `awty …` without the slash; in Antigravity, and anywhere else, use the same settings from a terminal: `awty status`, `awty set global min=300`.
+
 Full list: [Configuration → `/awty` reference](docs/configuration.md#awty-command-reference).
 
 ---
@@ -83,6 +77,7 @@ Full list: [Configuration → `/awty` reference](docs/configuration.md#awty-comm
 
 | Guide | What's in it |
 |---|---|
+| [Supported tools](docs/tools.md) | What works in Claude Code, Codex CLI and Antigravity, and how to install each |
 | [Channels](docs/channels.md) | Step-by-step setup for each service: Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assistant, macOS, Apprise |
 | [Configuration](docs/configuration.md) | Config files, every setting and its default, filters, secrets, the full `/awty` grammar |
 | [How it works](docs/how-it-works.md) | Which Claude Code events trigger messages, how names and summaries are chosen, where data is stored |
@@ -93,7 +88,7 @@ Full list: [Configuration → `/awty` reference](docs/configuration.md#awty-comm
 ## Development
 
 ```bash
-npm test          # 81 tests, no dependencies to install
+npm test          # all tests, no dependencies to install
 claude --plugin-dir .   # run Claude Code with your working copy of the plugin
 ```
 

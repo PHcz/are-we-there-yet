@@ -31,3 +31,29 @@ test('hooks.json registers four events through run.sh', () => {
 test('awty command exists', () => {
   assert.ok(fs.existsSync(new URL('../commands/awty.md', import.meta.url)));
 });
+
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+test('package.json declares the awty bin and publishable files', () => {
+  const p = read('package.json');
+  assert.equal(p.name, '@phcz/are-we-there-yet');
+  assert.equal(p.private, undefined);
+  assert.equal(p.bin.awty, 'bin/awty.mjs');
+  for (const f of ['bin', 'lib', 'channels', 'adapters', 'hooks', 'commands', '.claude-plugin']) assert.ok(p.files.includes(f), f);
+  assert.equal(read('.claude-plugin/plugin.json').version, p.version);
+});
+
+test('npm pack ships runtime files and no tests', () => {
+  const res = spawnSync('npm', ['pack', '--dry-run', '--json'], { encoding: 'utf8', cwd: fileURLToPath(new URL('..', import.meta.url)) });
+  const files = JSON.parse(res.stdout)[0].files.map((f) => f.path);
+  for (const f of ['bin/run.sh', 'bin/awty.mjs', 'adapters/agy.mjs', 'lib/install.mjs', 'hooks/hooks.json', 'docs/tools.md', 'LICENSE']) assert.ok(files.includes(f), f);
+  assert.ok(!files.some((f) => f.startsWith('test/')));
+
+});
+
+test('bin scripts are executable', () => {
+  for (const f of ['bin/run.sh', 'bin/awty.mjs', 'bin/send.mjs']) {
+    fs.accessSync(new URL(`../${f}`, import.meta.url), fs.constants.X_OK);
+  }
+});

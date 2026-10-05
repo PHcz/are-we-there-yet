@@ -98,3 +98,7 @@ test('describeConfig lists channels but never secrets', () => {
   assert.match(text, /telegram/);
   assert.doesNotMatch(text, /SECRET/);
 });
+
+test('"status" is accepted as the status action', () => {
+  assert.deepEqual(parseNotifyCommand('/awty status'), { scope: 'session', action: 'status', patch: {}, errors: [] });
+});

@@ -11,6 +11,7 @@ Settings are merged from four layers; later layers win:
 | 3. Project | `<project>/.claude/awty.json` | editing the file, or `/awty project …` |
 | 4. Session | stored per session ID | `/awty …` |
 
+- The project file `<project>/.claude/awty.json` applies to all tools, not just Claude Code. In a terminal, `awty set global|project …` does the same as `/awty global|project …`.
 - Objects are merged key by key. Lists such as `channels` and plain values are replaced.
 - The project layer is read from the project root (`CLAUDE_PROJECT_DIR`), so it still applies after Claude `cd`s into a subfolder.
 - Session settings disappear with the session; their files are cleaned up after 14 days.
@@ -67,6 +68,8 @@ You don't need to restart anything after changing settings: they are re-read on 
 
 Waiting messages are urgent by nature, so they ignore the duration and debounce filters. If a "⏳ permission" alert would arrive within 2 minutes of a "❓ question" alert for the same session, it's dropped as a duplicate.
 
+If you were sent a Waiting message during a task, its Done message is always sent, however short the task was. You were probably away, so you'll want to know when it finished.
+
 ### Summaries
 
 - **`last-message`** (default) uses Claude's final message for Done, and the question text or permission request for Waiting. Markdown is stripped, code blocks become `[code]`, and the text is cut to `maxChars` at a word boundary.
@@ -105,7 +108,7 @@ The first time the plugin reads an item, macOS may ask whether `security` may ac
 /awty [global|project] [setting…] | reset | test
 ```
 
-With no scope word, changes apply to **this session only**. `global` writes to `~/.config/are-we-there-yet/config.json`; `project` writes to `<project>/.claude/awty.json`.
+With no scope word, changes apply to **this session only**. `global` writes to `~/.config/are-we-there-yet/config.json`; `project` writes to `<project>/.claude/awty.json`. In a terminal, `awty set project …` writes `<current folder>/.claude/awty.json`, so run it from the project root.
 
 | Write | Sets |
 |---|---|
@@ -133,7 +136,7 @@ Actions:
 
 | Command | Does |
 |---|---|
-| `/awty` | Show the effective settings and the last error |
+| `/awty` or `/awty status` | Show the effective settings and the last error |
 | `/awty test` | Send a test message to every enabled channel, ignoring filters and mute |
 | `/awty reset` | Remove this session's overrides (session scope only) |
 

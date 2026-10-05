@@ -1,0 +1,30 @@
+{
+  "artifactDirectoryPath": "/Users/jane/.gemini/antigravity-cli/brain/7a4c102d-60ce-4a6b-af70-2b6ef86ec501",
+  "conversationId": "7a4c102d-60ce-4a6b-af70-2b6ef86ec501",
+  "modelName": "gemini-test",
+  "stepIdx": 6,
+  "toolCall": {
+    "args": {
+      "questions": [
+        {
+          "is_multi_select": false,
+          "options": [
+            "Blue",
+            "Red",
+            "Green",
+            "Purple",
+            "Yellow"
+          ],
+          "question": "What is your favourite colour?"
+        }
+      ],
+      "toolAction": "Asking favourite colour",
+      "toolSummary": "Favourite colour question"
+    },
+    "name": "ask_question"
+  },
+  "transcriptPath": "/Users/jane/.gemini/antigravity-cli/brain/7a4c102d-60ce-4a6b-af70-2b6ef86ec501/.system_generated/logs/transcript_full.jsonl",
+  "workspacePaths": [
+    "/Users/jane/code/demo"
+  ]
+}

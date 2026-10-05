@@ -8,7 +8,19 @@ import os from 'node:os';
 import path from 'node:path';
 import { globalConfigPath, projectConfigPath } from '../lib/paths.mjs';
 import { loadState, saveState } from '../lib/state.mjs';
-import { handle } from '../lib/hook.mjs';
+import { handle as coreHandle } from '../lib/hook.mjs';
+import * as claude from '../adapters/claude.mjs';
+
+// Runs a raw Claude Code payload through the adapter and core, in the pre-adapter result shape.
+function handle(raw, opts) {
+  const event = claude.normalize(raw);
+  if (!event) return {};
+  const { result, job } = coreHandle(event, opts);
+  const out = {};
+  if (result?.block) out.stdout = { decision: 'block', reason: result.block.reason };
+  if (job) out.job = job;
+  return out;
+}
 
 const FIX = fileURLToPath(new URL('./fixtures/transcript.jsonl', import.meta.url));
 const NOW = 2_000_000_000_000;

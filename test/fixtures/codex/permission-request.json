@@ -1,0 +1,14 @@
+{
+  "session_id": "01a1078b-8029-72f1-bb43-cefa7013dda8",
+  "turn_id": "01a1078b-de68-77f0-a76b-092eb603ac86",
+  "transcript_path": "/Users/jane/.codex/sessions/2026/10/04/rollout-2026-10-04T16-32-25-01a1078b-8029-72f1-bb43-cefa7013dda8.jsonl",
+  "cwd": "/Users/jane/code/demo",
+  "hook_event_name": "PermissionRequest",
+  "model": "gpt-test",
+  "permission_mode": "default",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "python3 -c 'from pathlib import Path; Path(\"hello3.txt\").write_text(\"hi\")'",
+    "description": "May I write hello3.txt in the workspace with the requested contents?"
+  }
+}

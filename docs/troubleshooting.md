@@ -14,6 +14,14 @@ The plugin's hooks aren't running in this session.
 - **Session started before you installed the plugin:** type `/reload-plugins` or start a new session.
 - **Node.js not found:** the hook needs Node.js 20+ on your `PATH` or in `/opt/homebrew/bin`, `/usr/local/bin` or `~/.volta/bin`. Check with `node --version`.
 
+## Codex: nothing happens
+
+Codex only runs hooks you have approved. Start Codex and type `/hooks` to review and accept awty's hooks (Codex asks again after the hooks change, e.g. when you reinstall). Then run `awty status` in a terminal and check that `codex` shows `installed`. See [Supported tools](tools.md#codex-cli).
+
+## Antigravity: no Waiting message for commands
+
+That's expected. Antigravity doesn't tell hooks when it's waiting for command approval, so only explicit questions (`ask_question`, `ask_permission`) and Done messages are sent. See [Supported tools](tools.md#antigravity-cli).
+
 ## Nothing arrives
 
 1. Run `/awty test`. It ignores filters and mute, so it's the quickest way to test a channel.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { handle } from '../lib/hook.mjs';
+import { parseHookArgs, prepareHook } from '../lib/entry.mjs';
 import { launchJob } from '../lib/job.mjs';
 import { logError } from '../lib/errorlog.mjs';
 
@@ -9,13 +9,18 @@ async function readStdin() {
   return data;
 }
 
-async function main() {
-  const input = JSON.parse((await readStdin()) || '{}');
-  const { stdout, job } = handle(input);
-  if (stdout) process.stdout.write(JSON.stringify(stdout));
+async function hookMain(args) {
+  const { out, job } = prepareHook({ ...parseHookArgs(args), stdin: await readStdin() });
+  if (out) process.stdout.write(out);
   if (job) await launchJob(job);
 }
 
-main()
-  .catch((err) => logError(`hook: ${err?.stack ?? err}`))
-  .finally(() => { process.exitCode = 0; });
+const [cmd, ...rest] = process.argv.slice(2);
+if (cmd === 'hook') {
+  hookMain(rest)
+    .catch((err) => logError(`hook: ${err?.stack ?? err}`))
+    .finally(() => { process.exitCode = 0; });
+} else {
+  const { runCli } = await import('../lib/cli.mjs');
+  process.exitCode = await runCli(cmd === undefined ? [] : [cmd, ...rest]);
+}
