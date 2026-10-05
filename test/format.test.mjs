@@ -96,3 +96,10 @@ test('cleanSummary never exceeds maxChars when the line cap also fires', () => {
 test('cleanSummary drops markdown table separator lines', () => {
   assert.equal(cleanSummary('| a | b |\n|---|:--:|\n| 1 | 2 |', { maxChars: 300 }), '| a | b |\n| 1 | 2 |');
 });
+
+test('formatMessage paused', () => {
+  const m = formatMessage({ kind: 'paused', sessionName: 's', durationSec: 252, summary: 'Waiting on 1 background task:\n• npm test', cwd: '/x/api', now: new Date(2026, 9, 6, 9, 5) });
+  assert.equal(m.title, '⏸ Paused · 4m 12s · s');
+  assert.equal(m.emoji, '⏸');
+  assert.equal(m.status, 'Paused');
+});

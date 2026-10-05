@@ -108,3 +108,27 @@ test('a new session on a tool without prompt events prunes old session files', (
   handle(ev({ type: 'done', text: 'ok', sessionId: 'fresh', turnStartedAt: Date.now() - 600_000 }), { idle: noIdle });
   assert.equal(fs.existsSync(p), false);
 });
+
+test('done with background tasks becomes a paused job listing them', () => {
+  saveState('codex:abc', { turnStartedAt: NOW - 90_000 });
+  const r = handle(ev({ type: 'done', text: 'Started both.', background: ['Review Task 3', 'npm test'] }), { now: NOW, idle: noIdle });
+  assert.equal(r.job.kind, 'paused');
+  assert.equal(r.job.durationSec, 90);
+  assert.equal(r.job.summaryInput.text, 'Waiting on 2 background tasks:\n• Review Task 3\n• npm test\n\nStarted both.');
+  assert.equal(r.job.summaryInput.mode, 'last-message');
+  assert.equal(loadState('codex:abc').lastDoneSentAt, undefined);
+});
+
+test('paused with one task and no message; paused=off suppresses it', () => {
+  saveState('codex:abc', { turnStartedAt: NOW - 90_000 });
+  assert.equal(handle(ev({ type: 'done', text: '', background: ['npm test'] }), { now: NOW, idle: noIdle }).job.summaryInput.text, 'Waiting on 1 background task:\n• npm test');
+  saveState('codex:abc', { turnStartedAt: NOW - 90_000, override: { events: { paused: false } } });
+  assert.deepEqual(handle(ev({ type: 'done', text: '', background: ['npm test'] }), { now: NOW, idle: noIdle }), {});
+});
+
+test('a Done right after a Paused is not debounced', () => {
+  saveState('codex:abc', { turnStartedAt: NOW - 90_000, override: { filters: { debounceSec: 300 } } });
+  handle(ev({ type: 'done', text: '', background: ['npm test'] }), { now: NOW, idle: noIdle });
+  const r = handle(ev({ type: 'done', text: 'All done' }), { now: NOW + 30_000, idle: noIdle });
+  assert.equal(r.job.kind, 'done');
+});
