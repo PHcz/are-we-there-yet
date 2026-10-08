@@ -17,15 +17,15 @@ Your global config lives at `~/.config/are-we-there-yet/config.json`; create it 
 |---|---|---|---|---|
 | [Telegram](#telegram) | Free | iOS + Android | Most people. Five-minute setup. | ✅ |
 | [ntfy](#ntfy) | Free | iOS + Android | No account at all | ✅ |
-| [Pushover](#pushover) | $5 one-time | iOS + Android | Most reliable. Can repeat until you acknowledge. | — |
+| [Pushover](#pushover) | $5 one-time | iOS + Android | Most reliable. Can repeat until you acknowledge. | ✅ |
 | [Slack](#slack) / [Discord](#discord) | Free | via their apps | You already live in Slack or Discord | ✅ both |
-| [Bark](#bark) | Free | iOS only | Breaks through Focus modes | — |
+| [Bark](#bark) | Free | iOS only | Breaks through Focus modes | ✅ |
 | [Gotify](#gotify) | Free (self-hosted) | Android only | Self-hosters | ✅ server |
-| [Home Assistant](#home-assistant) | Free | via HA app | You already run Home Assistant | — |
+| [Home Assistant](#home-assistant) | Free | via HA app | You already run Home Assistant | ✅ |
 | [macOS](#macos) | Free | none | At your desk. On by default. | ✅ |
 | [Apprise](#apprise) | Free | depends | Anything else: SMS, Signal, Matrix, email… | ✅ (via ntfy) |
 
-**Tested live** means a real message was sent to the real service (October 2026): it was delivered and shown correctly on the phone, or, for Gotify and Apprise, stored by a real Gotify server and delivered through Apprise to ntfy. Channels marked — are covered by automated tests against a simulated server that follows the service's documented API, but haven't yet been tried against the real service. If you use one, please report how it went.
+**Tested live** means a real message was sent to the real service (October 2026): it was delivered and shown correctly on the phone (Gotify: stored by a real Gotify server; Apprise: delivered through Apprise to ntfy; Home Assistant: through the companion app). Every channel has been checked this way, and all of them are also covered by automated tests against a simulated server.
 
 ---
 
