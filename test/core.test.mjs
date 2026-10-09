@@ -138,3 +138,20 @@ test('a task-notification wake-up does not reset the turn start', () => {
   assert.deepEqual(handle(ev({ type: 'prompt', prompt: '<task-notification>\n<task-id>x</task-id>\n</task-notification>' }), { now: NOW }), {});
   assert.equal(loadState('codex:abc').turnStartedAt, NOW - 300_000);
 });
+
+test('subagent hand-back wake-ups do not reset the turn start either', () => {
+  for (const prompt of [
+    'Another Claude session sent a message:\n<agent-message from="a15995fb5e9f5dc78">\n[Subagent hand-back] done',
+    '<agent-message from="abc">hello</agent-message>',
+  ]) {
+    saveState('codex:abc', { turnStartedAt: NOW - 600_000 });
+    assert.deepEqual(handle(ev({ type: 'prompt', prompt }), { now: NOW }), {});
+    assert.equal(loadState('codex:abc').turnStartedAt, NOW - 600_000);
+  }
+});
+
+test('a normal prompt mentioning agent-message still starts a new turn', () => {
+  saveState('codex:abc', { turnStartedAt: NOW - 600_000 });
+  handle(ev({ type: 'prompt', prompt: 'why did the <agent-message> parser fail?' }), { now: NOW });
+  assert.equal(loadState('codex:abc').turnStartedAt, NOW);
+});
