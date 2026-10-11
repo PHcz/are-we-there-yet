@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { globalConfigPath, projectConfigPath } from '../lib/paths.mjs';
 import { loadState, saveState } from '../lib/state.mjs';
+import { readRecentDecisions } from '../lib/decisions.mjs';
 import { handle as coreHandle } from '../lib/hook.mjs';
 import * as claude from '../adapters/claude.mjs';
 
@@ -90,6 +91,7 @@ test('PreToolUse AskUserQuestion sends waiting job with question and options', (
   assert.equal(r.job.summaryInput.text, 'Which DB?\n• Postgres\n• SQLite');
   assert.equal(r.job.summaryInput.mode, 'last-message');
   assert.equal(loadState('s1').lastWaitingSentAt, NOW);
+  assert.equal(loadState('s1').lastQuestionSentAt, NOW);
   assert.equal(r.stdout, undefined);
 });
 
@@ -97,11 +99,11 @@ test('PreToolUse for other tools is ignored', () => {
   assert.deepEqual(handle({ ...base, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: {} }, { now: NOW }), {});
 });
 
-test('Notification permission prompt sends; deduped after a question; other types ignored', () => {
+test('Notification permission prompt sends; a second one 1 s later is also sent; other types ignored', () => {
   const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'Claude needs permission to use Bash' }, { now: NOW, idle: noIdle });
   assert.equal(r.job.waitingReason, 'permission');
   assert.equal(r.job.summaryInput.text, 'Claude needs permission to use Bash');
-  assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'elicitation_dialog', message: 'x' }, { now: NOW + 1000, idle: noIdle }), {});
+  assert.equal(handle({ ...base, hook_event_name: 'Notification', notification_type: 'elicitation_dialog', message: 'x' }, { now: NOW + 1000, idle: noIdle }).job?.waitingReason, 'permission');
   assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'auth_success', message: 'x' }, { now: NOW + 999_999, idle: noIdle }), {});
 });
 
@@ -143,4 +145,57 @@ test('AWTY_DISABLE makes handler a no-op', () => {
   process.env.AWTY_DISABLE = '1';
   saveState('s1', { turnStartedAt: NOW - 125_000 });
   assert.deepEqual(handle({ ...base, hook_event_name: 'Stop' }, { now: NOW }), {});
+});
+
+const perm = (extra = {}) => ({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'x', ...extra });
+
+test('two permission alerts 30 s apart are both sent and no question timestamp is stored', () => {
+  assert.ok(handle(perm(), { now: NOW, idle: noIdle }).job);
+  assert.ok(handle(perm(), { now: NOW + 30_000, idle: noIdle }).job);
+  assert.equal(loadState('s1').lastQuestionSentAt, undefined);
+});
+
+test('permission alert 30 s after a question is skipped, 130 s after is sent', () => {
+  const ask = { ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } };
+  handle(ask, { now: NOW, idle: noIdle });
+  assert.deepEqual(handle(perm(), { now: NOW + 30_000, idle: noIdle }), {});
+  assert.ok(handle(perm(), { now: NOW + 130_000, idle: noIdle }).job);
+});
+
+test('every decision is logged with outcome and no content', () => {
+  saveState('s1', { turnStartedAt: NOW - 10_000 });
+  handle({ ...base, hook_event_name: 'Stop', last_assistant_message: 'SECRET TEXT' }, { now: NOW, idle: noIdle });
+  handle(perm(), { now: NOW, idle: noIdle });
+  const lines = readRecentDecisions(10);
+  assert.equal(lines.length, 2);
+  assert.match(lines[0], /^\S+ claude done skipped: too short \(10s < 60s\) · .+$/);
+  assert.match(lines[1], /^\S+ claude waiting sent · .+$/);
+  assert.ok(!lines.join('').includes('SECRET'));
+});
+
+test('decision log never contains prompt text, sent or skipped; ends with the project folder name', () => {
+  saveState('s1', { firstPrompt: 'my password is hunter2 please rotate', turnStartedAt: NOW - 10_000 });
+  const ask = { ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } };
+  assert.ok(handle(ask, { now: NOW, idle: noIdle }).job);
+  handle({ ...base, hook_event_name: 'Stop', last_assistant_message: 'x' }, { now: NOW + 1000, idle: noIdle });
+  const log = readRecentDecisions(10).join('\n');
+  assert.ok(!log.includes('hunter2') && !log.includes('password'));
+  const lines = log.split('\n');
+  assert.equal(lines.length, 2);
+  for (const l of lines) assert.match(l, / · api$/);
+});
+
+test('filters pass but no channels configured: logged as such, no job', () => {
+  writeJson(globalConfigPath(), { channels: [] });
+  const ask = { ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } };
+  assert.deepEqual(handle(ask, { now: NOW, idle: noIdle }), {});
+  assert.match(readRecentDecisions(1)[0], /^\S+ claude waiting no channels configured · api$/);
+});
+
+test('stored first prompt is truncated to 200 chars for events carrying firstPrompt (agy-style)', () => {
+  writeJson(globalConfigPath(), { channels: ['telegram'] });
+  const event = { tool: 'agy', sessionId: 'a1', type: 'done', cwd: '/x/api', projectDir: '/x/api', text: 'ok', firstPrompt: 'p'.repeat(500) };
+  const { job } = coreHandle(event, { now: NOW, idle: noIdle });
+  assert.ok(job);
+  assert.equal(loadState('agy:a1').firstPrompt.length, 200);
 });

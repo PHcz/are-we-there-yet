@@ -6,7 +6,7 @@ import { tmpHome } from './helpers.mjs';
 import { writeJson } from '../lib/jsonfile.mjs';
 import { globalConfigPath, projectConfigPath, errorLogPath } from '../lib/paths.mjs';
 import { saveState } from '../lib/state.mjs';
-import { DEFAULTS, deepMerge, loadConfig, resolveSecrets } from '../lib/config.mjs';
+import { DEFAULTS, defaultChannels, deepMerge, loadConfig, resolveSecrets } from '../lib/config.mjs';
 import { logError, readLastError } from '../lib/errorlog.mjs';
 
 test('deepMerge merges objects, replaces arrays and scalars', () => {
@@ -67,4 +67,10 @@ test('loadConfig normalizes channels to an array', () => {
   assert.deepEqual(loadConfig({}).channels, ['telegram']);
   writeJson(globalConfigPath(), { channels: 5 });
   assert.deepEqual(loadConfig({}).channels, []);
+});
+
+test('default channels are platform aware', () => {
+  assert.deepEqual(defaultChannels('darwin'), ['macos']);
+  assert.deepEqual(defaultChannels('linux'), []);
+  assert.deepEqual(defaultChannels('win32'), []);
 });

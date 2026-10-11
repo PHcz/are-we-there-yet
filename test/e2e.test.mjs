@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { tmpHome } from './helpers.mjs';
@@ -91,4 +93,42 @@ test('Antigravity ask_question through run.sh (detached send, no channels) print
   const res = spawnSync(RUN, ['--tool', 'agy', '--event', 'PreToolUse'], { input: JSON.stringify(raw), encoding: 'utf8', env });
   assert.equal(res.status, 0);
   assert.equal(res.stdout, '');
+});
+
+test('run.sh logs and exits 0 when node cannot be found', () => {
+  const home = tmpHome();
+  const res = spawnSync(RUN, [], {
+    input: '{}', encoding: 'utf8',
+    env: { PATH: '/nonexistent', HOME: home, AWTY_HOME: home, AWTY_NODE_CANDIDATES: '/nonexistent/a:/nonexistent/b' },
+  });
+  assert.equal(res.status, 0);
+  assert.equal(res.stdout, '');
+  assert.equal(res.stderr, '');
+  assert.equal(fs.statSync(`${home}/error.log`).mode & 0o777, 0o600);
+  assert.match(fs.readFileSync(`${home}/error.log`, 'utf8'), /^\d{4}-\d\d-\d\dT[\d:]+Z hook: node not found \(looked on PATH and in common locations\)\n$/);
+});
+
+test('run.sh still resolves its own directory under PATH=/nonexistent', () => {
+  const home = tmpHome();
+  const res = spawnSync(RUN, [], {
+    input: JSON.stringify({ session_id: 'p1', cwd: '/tmp', hook_event_name: 'UserPromptSubmit', prompt: '/awty' }),
+    encoding: 'utf8',
+    env: { PATH: '/nonexistent', HOME: home, AWTY_HOME: home, AWTY_NODE_CANDIDATES: process.execPath },
+  });
+  assert.equal(res.status, 0);
+  assert.equal(res.stderr, '');
+  assert.equal(JSON.parse(res.stdout).decision, 'block');
+});
+
+test('run.sh never executes a node from the current directory (empty PATH)', () => {
+  const home = tmpHome();
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'awty-cwd-'));
+  const marker = path.join(cwd, 'ran');
+  fs.writeFileSync(path.join(cwd, 'node'), `#!/bin/sh\ntouch "${marker}"\n`, { mode: 0o755 });
+  const res = spawnSync(RUN, [], {
+    input: '{}', encoding: 'utf8', cwd,
+    env: { PATH: '', HOME: home, AWTY_HOME: home, AWTY_NODE_CANDIDATES: '/nonexistent/a:/nonexistent/b' },
+  });
+  assert.equal(res.status, 0);
+  assert.equal(fs.existsSync(marker), false);
 });

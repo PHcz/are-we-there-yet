@@ -51,7 +51,8 @@ test('dispatch with real resolver', async () => {
   assert.deepEqual(res.sent, ['a']);
   assert.deepEqual(res.failed.map((f) => f.name).sort(), ['b', 'c', 'zzz']);
   assert.equal(errors.length, 3);
-  assert.ok(errors.some((e) => /unknown channel zzz/.test(e)));
+  assert.ok(errors.includes('zzz: unknown channel zzz'));
+  assert.ok(errors.includes('b: boom'));
 });
 
 test('dispatch times out slow channels', async () => {
@@ -66,4 +67,11 @@ test('dispatch dry run prints instead of sending', async () => {
   const res = await dispatch(msg, { channels: ['a'] }, { channels, dryRun: true, out: (s) => lines.push(s) });
   assert.deepEqual(res.sent, ['a']);
   assert.deepEqual(JSON.parse(lines[0]), { channel: 'a', title: msg.title, body: msg.body });
+});
+
+test('channel error prefix is not doubled', async () => {
+  const errors = [];
+  const res = await dispatch(msg, { channels: ['telegram', 'xyz'], telegram: {} }, { channels: CHANNELS, log: (e) => errors.push(e) });
+  assert.deepEqual(errors.sort(), ['telegram: missing botToken', 'xyz: unknown channel xyz']);
+  assert.equal(res.failed.find((f) => f.name === 'telegram').error, 'telegram: missing botToken');
 });

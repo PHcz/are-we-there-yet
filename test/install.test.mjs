@@ -229,7 +229,7 @@ test('claude uninstall reports ENOENT and failures, and succeeds otherwise', () 
 
 test('missing tool name is a clear error', () => {
   assert.throws(() => install(undefined), /which tool\? use: awty install <claude\|codex\|agy>/);
-  assert.throws(() => uninstall(undefined), /which tool\?/);
+  assert.throws(() => uninstall(undefined), /which tool\? use: awty uninstall <claude\|codex\|agy>/);
 });
 
 test('installStatus flags stale paths for codex and agy', () => {
@@ -249,4 +249,11 @@ test('installStatus flags stale paths for codex and agy', () => {
   assert.equal(get(s, 'codex', 'global'), true);
   assert.equal(get(s, 'agy', 'global'), true);
   assert.ok(codexFile);
+});
+
+test('claude uninstall also removes the local marketplace, ignoring its failure', () => {
+  const calls = [];
+  const run = (cmd, args) => { calls.push(args.join(' ')); return { status: args[1] === 'marketplace' ? 1 : 0, stdout: '' }; };
+  assert.equal(uninstall('claude', { run }).removed, true);
+  assert.deepEqual(calls, ['plugin uninstall are-we-there-yet@are-we-there-yet-local', 'plugin marketplace remove are-we-there-yet-local']);
 });
