@@ -92,3 +92,14 @@ test('Antigravity ask_question through run.sh (detached send, no channels) print
   assert.equal(res.status, 0);
   assert.equal(res.stdout, '');
 });
+
+test('run.sh logs and exits 0 when node cannot be found', () => {
+  const home = tmpHome();
+  const res = spawnSync(RUN, [], {
+    input: '{}', encoding: 'utf8',
+    env: { PATH: '/nonexistent', HOME: home, AWTY_HOME: home, AWTY_NODE_CANDIDATES: '/nonexistent/a:/nonexistent/b' },
+  });
+  assert.equal(res.status, 0);
+  assert.equal(res.stdout, '');
+  assert.match(fs.readFileSync(`${home}/error.log`, 'utf8'), /^\d{4}-\d\d-\d\dT[\d:]+Z hook: node not found \(looked on PATH and in common locations\)\n$/);
+});

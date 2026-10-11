@@ -102,7 +102,7 @@ test('pushover form with emergency priority for waiting', async () => {
 test('bark', async () => {
   await bark.send(waiting, { server: base, key: 'K' });
   assert.equal(last.url, '/push');
-  assert.deepEqual(json(), { device_key: 'K', title: waiting.title, body: waiting.body, level: 'timeSensitive', group: 'claude' });
+  assert.deepEqual(json(), { device_key: 'K', title: waiting.title, body: waiting.body, level: 'timeSensitive', group: 'awty' });
 });
 
 test('gotify', async () => {

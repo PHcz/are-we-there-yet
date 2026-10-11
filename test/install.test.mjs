@@ -250,3 +250,10 @@ test('installStatus flags stale paths for codex and agy', () => {
   assert.equal(get(s, 'agy', 'global'), true);
   assert.ok(codexFile);
 });
+
+test('claude uninstall also removes the local marketplace, ignoring its failure', () => {
+  const calls = [];
+  const run = (cmd, args) => { calls.push(args.join(' ')); return { status: args[1] === 'marketplace' ? 1 : 0, stdout: '' }; };
+  assert.equal(uninstall('claude', { run }).removed, true);
+  assert.deepEqual(calls, ['plugin uninstall are-we-there-yet@are-we-there-yet-local', 'plugin marketplace remove are-we-there-yet-local']);
+});

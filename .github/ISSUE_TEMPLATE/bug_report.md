@@ -4,7 +4,7 @@ about: Something isn't being sent, or awty behaves unexpectedly
 labels: bug
 ---
 
-> ⚠️ **Don't paste secrets.** Remove bot tokens, webhook URLs, API keys and chat IDs from anything you paste below. Issues are public.
+> ⚠️ **Don't paste secrets.** Remove bot tokens, webhook URLs, API keys and chat IDs from anything you paste below. Anyone who can see this repository can read issues.
 
 **What happened, and what did you expect?**
 
