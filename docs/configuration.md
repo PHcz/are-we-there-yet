@@ -16,6 +16,7 @@ Settings are merged from four layers; later layers win:
 - For Claude Code, the project layer is read from the project root (`CLAUDE_PROJECT_DIR`), so it still applies after Claude `cd`s into a subfolder. For Codex and Antigravity it's read from the folder the agent is working in.
 - Session settings disappear with the session; their files are cleaned up after 14 days.
 - If a file isn't valid JSON, that layer is skipped and the error is logged. The other layers still apply.
+- Files that awty creates are readable only by you. A `config.json` you create by hand keeps whatever permissions you gave it, so run `chmod 600 ~/.config/are-we-there-yet/config.json`, especially if it holds a literal token (better: use [`keychain:` or `env:`](#storing-secrets)).
 
 You don't need to restart anything after changing settings: they are re-read on every event.
 
@@ -44,15 +45,15 @@ You don't need to restart anything after changing settings: they are re-read on 
 | Setting | Default | Meaning |
 |---|---|---|
 | `enabled` | `true` | Master switch |
-| `channels` | `["macos"]` | Where messages go. See [Channels](channels.md). |
+| `channels` | `["macos"]` on macOS, none elsewhere | Where messages go. On Linux, set a channel first. See [Channels](channels.md). |
 | `events.done` | `true` | Send "✅ Done" when a task finishes |
 | `events.waiting` | `true` | Send "❓/⏳ Waiting for you" when the agent asks a question or needs permission |
-| `events.paused` | `true` | Send "⏸ Paused" when Claude Code stops while background tasks are still running (Claude Code only) |
+| `events.paused` | `true` | Send "⏸ Paused" when Claude Code stops while background tasks are still running (Claude Code only; see [Paused](how-it-works.md#paused-background-jobs)) |
 | `filters.minDurationSec` | `60` | Only send Done if the task took at least this many seconds |
-| `filters.onlyWhenAwaySec` | `0` (off) | Only send if your Mac has had no keyboard or mouse input for this many seconds |
+| `filters.onlyWhenAwaySec` | `0` (off) | Only send if your Mac has had no keyboard or mouse input for this many seconds. macOS only: on Linux it is ignored and messages are sent. |
 | `filters.debounceSec` | `0` (off) | At most one Done per session in this many seconds |
 | `filters.always` | `false` | Send every Done, ignoring the three filters above |
-| `summary.mode` | `last-message` | `last-message`: the agent's final reply, cleaned up. `llm`: a one-sentence summary written by Claude Haiku. |
+| `summary.mode` | `last-message` | `last-message`: the agent's final reply, cleaned up. `llm`: a one-sentence summary written by Claude Haiku (see [Summaries](#summaries)). |
 | `summary.maxChars` | `300` | Maximum summary length |
 | `name` | none | Session name used in messages (normally set per session with `/awty name="…"`) |
 | `<channel>` | — | Settings for each channel, e.g. `"telegram": {…}`. See [Channels](channels.md). |
@@ -70,10 +71,12 @@ Each kind of message has its own switch. All three are on by default.
 Set them for one session, one project, or everything:
 
 ```
-/awty paused=off                 this session (Claude Code; in Codex type: awty paused=off)
+/awty paused=off                 this session (Claude Code only)
 awty set project done=off        the project in the current folder, from a terminal
 awty set global waiting=off      every session, from a terminal
 ```
+
+In Codex you can switch `done` and `waiting` for a session by typing `awty done=off` (no slash). `paused` has no effect there, because Paused is Claude Code only.
 
 Common combinations:
 
@@ -95,25 +98,39 @@ Common combinations:
 
 ⏸ Paused follows the same rules as Done, except the debounce (it neither counts toward nor is blocked by `debounceSec`).
 
-Waiting messages are urgent by nature, so they ignore the duration and debounce filters. If a "⏳ permission" alert would arrive within 2 minutes of a "❓ question" alert for the same session, it's dropped as a duplicate.
+Waiting messages are urgent by nature, so they ignore the duration and debounce filters. The rules for the ones that arrive close together:
 
-If you were sent a Waiting message during a task, its Done message is always sent, however short the task was. You were probably away, so you'll want to know when it finished.
+- **Waiting de-duplication.** A "⏳ permission" alert is skipped only if a "❓ question" alert for the same session went out in the previous 2 minutes (the agent often raises both for one question). Two permission requests in a row both notify.
+- **Done after a Waiting message.** If you were sent a Waiting message during the same task, its Done skips the minimum-duration filter only. You were probably away, so you'll want to know when it finished. Debounce and away-from-keyboard still apply.
+- **Unknown start.** If awty doesn't know when the task started (the session began before you installed awty), Done is sent without a duration and the minimum-duration filter doesn't apply.
+
+To see why a particular message was or wasn't sent, run `awty status` and read the `Recent:` lines. See [The decision log](how-it-works.md#the-decision-log).
 
 ### Summaries
 
 - **`last-message`** (default) uses the agent's final message for Done, and the question text or permission request for Waiting. Line breaks, paragraphs and bullets are kept (bullets show as `•`). Markdown styling is removed, code blocks become `[code]`, and the summary is limited to 8 non-empty lines and `maxChars` characters, ending in `…` when cut.
-- **`llm`** asks `claude -p --model haiku` for one sentence. For Claude Code it's based on the end of the conversation; for Codex and Antigravity, on the agent's last message. It needs the `claude` CLI installed, whichever tool the session runs in. It adds a few seconds and a small API cost per Done message. If it fails or takes more than 15 seconds, the plugin falls back to `last-message`. Waiting messages always use `last-message`.
+- **`llm`** asks `claude -p --model haiku` for one sentence of up to 200 characters.
+  - For Claude Code it's based on the end of the conversation; for Codex and Antigravity, on the agent's last message.
+  - It needs the `claude` CLI installed, whichever tool the session runs in, and adds a few seconds and a small API cost per Done message.
+  - If `claude` is missing, fails or takes more than 15 seconds, awty silently falls back to `last-message`.
+  - Only Done uses it. Paused and Waiting messages (and test messages) always use `last-message`.
 
 ## Storing secrets
 
-Any setting value can point at a secret instead of containing it:
+A setting value can point at a secret instead of containing it:
 
 | Write | Reads from |
 |---|---|
 | `"keychain:awty-telegram"` | the macOS Keychain item with service name `awty-telegram` |
 | `"env:TELEGRAM_BOT_TOKEN"` | the environment variable `TELEGRAM_BOT_TOKEN` |
 
-Secrets are resolved only at the moment a message is sent and never written to the log.
+Rules:
+
+- `env:` and `keychain:` are resolved only for values inside a channel block (`"telegram": {…}`, `"slack": {…}` and so on). Elsewhere in the config they are taken as plain text.
+- A secret is resolved only at the moment a message is sent and is never written to the log.
+- An empty value counts as unresolved: the message fails with `<channel>: unresolved secret keychain:awty-telegram` in the error log.
+- Keychain lookup is by service name (`-s`), whatever the account name is.
+- `keychain:` works on macOS only. On Linux use `env:`; see [Environment variables as secrets](channels.md#using-environment-variables-instead-of-keychain).
 
 **Keychain** (recommended on macOS):
 
@@ -121,7 +138,7 @@ Secrets are resolved only at the moment a message is sent and never written to t
 security add-generic-password -s awty-telegram -a "$USER" -w
 ```
 
-Terminal asks for the value twice. To replace an existing value, add `-U`. To remove it:
+Terminal asks for the value (on some macOS versions twice). Paste it and press Enter each time; nothing is shown while you paste. To replace an existing value, add `-U`. To remove it:
 
 ```bash
 security delete-generic-password -s awty-telegram
@@ -137,7 +154,7 @@ The first time are-we-there-yet reads an item, macOS may ask whether `security` 
 /awty [global|project] [setting…] | reset | test
 ```
 
-With no scope word, changes apply to **this session only**. `global` writes to `~/.config/are-we-there-yet/config.json`; `project` writes to `<project>/.claude/awty.json`. In a terminal, `awty set project …` writes `<current folder>/.claude/awty.json`, so run it from the project root.
+With no scope word, changes apply to **this session only**. `global` writes to `~/.config/are-we-there-yet/config.json`; `project` writes to `<project>/.claude/awty.json`. In a terminal, see [The `awty` terminal command](#the-awty-terminal-command).
 
 | Write | Sets |
 |---|---|
@@ -174,6 +191,48 @@ If anything in the command is invalid, nothing is changed and the reply lists wh
 
 Channel settings such as tokens can't be set with `/awty`; edit the config file for those.
 
+## The `awty` terminal command
+
+`awty` is installed with the package and works in any terminal. It does the same jobs as `/awty`, plus installing hooks.
+
+```
+awty <install|uninstall|status|test|set|help> [arguments]
+```
+
+| Command | What it does |
+|---|---|
+| `awty install <claude\|codex\|agy> [--project]` | Add the notification hooks to a tool. See [Install details](tools.md#install-details). |
+| `awty uninstall <claude\|codex\|agy> [--project]` | Remove them. See [Upgrading and uninstalling](tools.md#upgrading-and-uninstalling). |
+| `awty status` | Show the effective settings (global plus the project in the current folder), the last error, the last 5 [decisions](how-it-works.md#the-decision-log) and which hooks are installed. |
+| `awty test` | Send a test message to every channel, ignoring filters and mute. Prints `Sent: telegram, macos`; failures are printed as `Failed: <channel>: <error>`. |
+| `awty set <global\|project> key=value …` | Change settings with the same keys as `/awty`. Quote values with spaces: `awty set global name="my app"`. |
+| `awty help` | Print the usage text (also `awty` with no arguments, `--help` and `-h`). |
+
+Notes:
+
+- `--project` makes `install`/`uninstall` act on the current folder's `.codex/hooks.json` or `.agents/hooks.json` instead of your home folder. It isn't supported for `claude`. `awty set project …` always writes `<current folder>/.claude/awty.json`; run it from the project root.
+- `awty set` needs `global` or `project`, because a terminal has no session to change. `awty set global off` mutes everything; `awty set global on` turns it back on. `reset` only applies to sessions.
+- Terminal `awty status` doesn't show a session's own overrides; type `/awty` (Claude Code) or `awty status` (Codex) inside that session for those.
+- `awty test` prints `No channels configured. Add one: see docs/channels.md` and fails when `channels` is empty (the default on Linux).
+
+**Exit codes**
+
+| Code | Meaning |
+|---|---|
+| `0` | OK |
+| `1` | `install`/`uninstall` failed (the reason is printed), `awty test` has no channels, or at least one channel failed in `awty test` |
+| `2` | Usage error: unknown command, `awty set` without `global`/`project` or without a `key=value`, or an invalid setting |
+
+**Three ways to change the same setting**
+
+| Where you are | Type | Applies to |
+|---|---|---|
+| Claude Code session | `/awty global min=300` | all sessions, all tools |
+| Codex session | `awty global min=300` (no slash) | all sessions, all tools |
+| Any terminal | `awty set global min=300` | all sessions, all tools |
+
+Leave out `global` (inside a session) for that session only, or use `project` for the current project. Antigravity has no in-session command, so use the terminal form.
+
 ## Environment variables
 
 For debugging and development:
@@ -184,3 +243,4 @@ For debugging and development:
 | `AWTY_DRY_RUN=1` | Print what would be sent instead of sending |
 | `AWTY_SYNC=1` | Send in the foreground instead of a background process |
 | `AWTY_DISABLE=1` | Turn are-we-there-yet off completely for that process |
+| `CODEX_HOME` | Where Codex keeps its files. awty uses it to find `hooks.json` and Codex's thread titles (default `~/.codex`). |

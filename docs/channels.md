@@ -29,6 +29,31 @@ Your global config lives at `~/.config/are-we-there-yet/config.json`; create it 
 
 ---
 
+## Using environment variables instead of Keychain
+
+On Linux there is no Keychain, so use `env:` for every secret. It also works on macOS. For example, with Slack:
+
+1. Put the secret in a variable in your shell profile (`~/.bashrc`, `~/.zshrc`, …):
+
+```bash
+export AWTY_SLACK_WEBHOOK='https://hooks.slack.com/services/…'
+```
+
+2. Refer to it in the channel's block:
+
+```json
+{
+  "channels": ["slack"],
+  "slack": { "webhookUrl": "env:AWTY_SLACK_WEBHOOK" }
+}
+```
+
+3. Open a new terminal, start the tool (`claude`, `codex` or `agy`) from it, and send a test.
+
+**The tool must be started with the variable set.** The hooks run inside the tool and only see its environment. A tool launched from a desktop icon, a launcher or a service usually doesn't read your shell profile, and then the error log says `slack: unresolved secret env:AWTY_SLACK_WEBHOOK`. After changing the variable, restart the tool. Note that `awty test` runs in your terminal, so it can succeed even when the tool's own environment lacks the variable.
+
+---
+
 ## Telegram
 
 You need a **bot token**, which works as the bot's password, and your **chat ID**, which tells the bot whose chat to post into.
@@ -37,7 +62,7 @@ You need a **bot token**, which works as the bot's password, and your **chat ID*
 
 **2. Start the bot.** Open your new bot via `https://t.me/<bot_username>`, tap **Start**, and send `hi`. A bot can't message you until you've messaged it first.
 
-**3. Save the token in Keychain.** Terminal will ask for the token. Paste it and press Enter twice; nothing appears while you paste:
+**3. Save the token in Keychain.** Terminal asks for the value (on some macOS versions twice). Paste it and press Enter each time; nothing is shown while you paste. (On Linux, use [an environment variable](#using-environment-variables-instead-of-keychain) instead.)
 
 ```bash
 security add-generic-password -s awty-telegram -a "$USER" -w
@@ -79,6 +104,7 @@ security add-generic-password -U -s awty-telegram -a "$USER" -w
 |---|---|---|
 | `botToken` | yes | From @BotFather |
 | `chatId` | yes | Your numeric chat ID, as a string |
+| `apiBase` | no | Alternative Bot API address (default `https://api.telegram.org`). For testing or a self-hosted Bot API server. |
 
 ---
 
@@ -133,6 +159,9 @@ security add-generic-password -s awty-pushover -a "$USER" -w
 | `user` | (required) | Your user key |
 | `priority` | `0` | Priority for Done (-2 to 2) |
 | `waitingPriority` | `0` | Priority for Waiting. `1` bypasses quiet hours. `2` repeats every minute for up to an hour until acknowledged. |
+| `apiBase` | `https://api.pushover.net` | Alternative API address, for testing or self-hosting |
+
+Whenever the priority used for a message is `2` (`priority` for Done, `waitingPriority` for Waiting), awty also sends Pushover's emergency settings: retry every 60 seconds, expire after 3600 seconds.
 
 ---
 
@@ -170,6 +199,8 @@ security add-generic-password -s awty-pushover -a "$USER" -w
 |---|---|
 | `webhookUrl` | The `https://discord.com/api/webhooks/…` URL. It's a secret. |
 
+Messages can't ping anyone: `@everyone`, `@here` and user or role mentions in the text are not turned into mentions.
+
 ---
 
 ## Bark
@@ -192,6 +223,8 @@ security add-generic-password -s awty-pushover -a "$USER" -w
 | `server` | `https://api.day.app` | Your own Bark server, if self-hosting |
 | `level` | `active` | Level for Done: `passive`, `active`, `timeSensitive` or `critical` |
 | `waitingLevel` | `timeSensitive` | Level for Waiting. `critical` plays sound even when muted. |
+
+Bark groups all messages under `awty`, so they collect in one thread in the app.
 
 ---
 
@@ -253,7 +286,7 @@ On by default. Shows a native notification banner. It needs no setup, but it onl
 |---|---|---|
 | `sound` | none | Any name from `/System/Library/Sounds`, e.g. `Glass`, `Ping`, `Hero` |
 
-If no banner appears, check **System Settings → Notifications → Script Editor** and allow notifications.
+Works on macOS only; on Linux remove `macos` from `channels`. If no banner appears, check **System Settings → Notifications → Script Editor** and allow notifications.
 
 ---
 
@@ -291,4 +324,4 @@ urls:
 | `config` | Full path to an Apprise config file, e.g. `/Users/jane/.config/are-we-there-yet/apprise.yml` |
 | `urls` | Alternatively, a list of Apprise URLs inline. Each may be `keychain:`/`env:`. |
 
-If Apprise isn't installed, the error log says `apprise: not installed — run: uv tool install apprise`.
+If Apprise isn't installed, the error log says `apprise: not installed — run: uv tool install apprise`. If Apprise runs but fails, it says `apprise: exit <code>: <Apprise's message>`.
