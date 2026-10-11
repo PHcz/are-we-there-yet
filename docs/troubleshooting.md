@@ -1,12 +1,12 @@
 # Troubleshooting
 
-Start with `/awty` in a Claude Code session. It shows your effective settings and the **last error**. The full log is at `~/.config/are-we-there-yet/error.log`:
+Start with `awty status` in a terminal (or `/awty` in a Claude Code session, `awty status` in Codex). It shows your effective settings, the **last error**, and which tools have the hooks installed. The full log is at `~/.config/are-we-there-yet/error.log`:
 
 ```bash
 tail -20 ~/.config/are-we-there-yet/error.log
 ```
 
-## `/awty` gets an answer from Claude instead of a status reply
+## Claude Code: `/awty` gets an answer from Claude instead of a status reply
 
 The plugin's hooks aren't running in this session.
 
@@ -18,14 +18,18 @@ The plugin's hooks aren't running in this session.
 
 Codex only runs hooks you have approved. Start Codex and type `/hooks` to review and accept awty's hooks (Codex asks again after the hooks change, e.g. when you reinstall). Then run `awty status` in a terminal and check that `codex` shows `installed`. See [Supported tools](tools.md#codex-cli).
 
+## Antigravity: nothing happens
+
+Type `/hooks` in Antigravity and check that an entry named `are-we-there-yet` is listed under **PreToolUse** and **Stop**. If it isn't, run `awty install agy` and start a new Antigravity session. `awty status` in a terminal should show `agy global installed`. Remember that quick tasks stay silent: by default a Done is only sent for tasks of 60 seconds or more.
+
 ## Antigravity: no Waiting message for commands
 
 That's expected. Antigravity doesn't tell hooks when it's waiting for command approval, so only explicit questions (`ask_question`, `ask_permission`) and Done messages are sent. See [Supported tools](tools.md#antigravity-cli).
 
 ## Nothing arrives
 
-1. Run `/awty test`. It ignores filters and mute, so it's the quickest way to test a channel.
-2. Check `/awty` for the last error. Common ones:
+1. Run `awty test` in a terminal (or `/awty test` in Claude Code). It ignores filters and mute, so it's the quickest way to test a channel.
+2. Check `awty status` for the last error. Common ones:
 
 | Error | Meaning | Fix |
 |---|---|---|
@@ -61,9 +65,9 @@ Banners are shown through Script Editor. Open **System Settings → Notification
 
 ## macOS asks "security wants to use your confidential information"
 
-That's the plugin reading your token from Keychain. Click **Always Allow** so it doesn't ask again.
+That's are-we-there-yet reading your token from Keychain. Click **Always Allow** so it doesn't ask again.
 
-## Testing without Claude Code
+## Testing from a terminal
 
 Simulate a "Done" event and print what would be sent, without sending anything:
 
@@ -71,7 +75,7 @@ Simulate a "Done" event and print what would be sent, without sending anything:
 echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"Stop\",\"last_assistant_message\":\"hi\"}" | AWTY_DRY_RUN=1 AWTY_SYNC=1 ~/are-we-there-yet/bin/run.sh
 ```
 
-Send a real test message from Terminal. Replace `~/are-we-there-yet` with wherever the plugin lives:
+Send a real test message from Terminal. Replace `~/are-we-there-yet` with wherever are-we-there-yet is installed:
 
 ```bash
 echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"/awty test\"}" | AWTY_SYNC=1 ~/are-we-there-yet/bin/run.sh

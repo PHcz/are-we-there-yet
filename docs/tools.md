@@ -10,7 +10,7 @@
 | Change settings in a session | `/awty …` | `awty …` (no slash) | — use `awty` in a terminal |
 | Install | `awty install claude` | `awty install codex` | `awty install agy` |
 
-Messages from Codex and Antigravity show the tool name first: `✅ [Codex · Fix login bug] Done · 3m10s`.
+Messages from Codex and Antigravity show the tool next to the session name: `Fix login bug · Codex` on the card, or `✅ Done · 3m 10s · Fix login bug (Codex)` in push notifications. Claude Code sessions show no tool name.
 
 ## Claude Code
 

@@ -6,14 +6,14 @@ Settings are merged from four layers; later layers win:
 
 | Layer | Location | Set it with |
 |---|---|---|
-| 1. Built-in defaults | in the plugin | — |
+| 1. Built-in defaults | built in | — |
 | 2. Global | `~/.config/are-we-there-yet/config.json` | editing the file, or `/awty global …` |
 | 3. Project | `<project>/.claude/awty.json` | editing the file, or `/awty project …` |
 | 4. Session | stored per session ID | `/awty …` |
 
 - The project file `<project>/.claude/awty.json` applies to all tools, not just Claude Code. In a terminal, `awty set global|project …` does the same as `/awty global|project …`.
 - Objects are merged key by key. Lists such as `channels` and plain values are replaced.
-- The project layer is read from the project root (`CLAUDE_PROJECT_DIR`), so it still applies after Claude `cd`s into a subfolder.
+- For Claude Code, the project layer is read from the project root (`CLAUDE_PROJECT_DIR`), so it still applies after Claude `cd`s into a subfolder. For Codex and Antigravity it's read from the folder the agent is working in.
 - Session settings disappear with the session; their files are cleaned up after 14 days.
 - If a file isn't valid JSON, that layer is skipped and the error is logged. The other layers still apply.
 
@@ -46,13 +46,13 @@ You don't need to restart anything after changing settings: they are re-read on 
 | `enabled` | `true` | Master switch |
 | `channels` | `["macos"]` | Where messages go. See [Channels](channels.md). |
 | `events.done` | `true` | Send "✅ Done" when a task finishes |
-| `events.waiting` | `true` | Send "❓/⏳ Waiting for you" when Claude asks a question or needs permission |
-| `events.paused` | `true` | Send "⏸ Paused" when Claude Code stops while background tasks are still running |
+| `events.waiting` | `true` | Send "❓/⏳ Waiting for you" when the agent asks a question or needs permission |
+| `events.paused` | `true` | Send "⏸ Paused" when Claude Code stops while background tasks are still running (Claude Code only) |
 | `filters.minDurationSec` | `60` | Only send Done if the task took at least this many seconds |
 | `filters.onlyWhenAwaySec` | `0` (off) | Only send if your Mac has had no keyboard or mouse input for this many seconds |
 | `filters.debounceSec` | `0` (off) | At most one Done per session in this many seconds |
 | `filters.always` | `false` | Send every Done, ignoring the three filters above |
-| `summary.mode` | `last-message` | `last-message`: Claude's final reply, cleaned up. `llm`: a one-sentence summary written by Claude Haiku. |
+| `summary.mode` | `last-message` | `last-message`: the agent's final reply, cleaned up. `llm`: a one-sentence summary written by Claude Haiku. |
 | `summary.maxChars` | `300` | Maximum summary length |
 | `name` | none | Session name used in messages (normally set per session with `/awty name="…"`) |
 | `<channel>` | — | Settings for each channel, e.g. `"telegram": {…}`. See [Channels](channels.md). |
@@ -75,8 +75,8 @@ If you were sent a Waiting message during a task, its Done message is always sen
 
 ### Summaries
 
-- **`last-message`** (default) uses Claude's final message for Done, and the question text or permission request for Waiting. Line breaks, paragraphs and bullets are kept (bullets show as `•`). Markdown styling is removed, code blocks become `[code]`, and the summary is limited to 8 non-empty lines and `maxChars` characters, ending in `…` when cut.
-- **`llm`** asks `claude -p --model haiku` for one sentence based on the end of the conversation. It adds a few seconds and a small API cost per Done message. If it fails or takes more than 15 seconds, the plugin falls back to `last-message`. Waiting messages always use `last-message`.
+- **`last-message`** (default) uses the agent's final message for Done, and the question text or permission request for Waiting. Line breaks, paragraphs and bullets are kept (bullets show as `•`). Markdown styling is removed, code blocks become `[code]`, and the summary is limited to 8 non-empty lines and `maxChars` characters, ending in `…` when cut.
+- **`llm`** asks `claude -p --model haiku` for one sentence. For Claude Code it's based on the end of the conversation; for Codex and Antigravity, on the agent's last message. It needs the `claude` CLI installed, whichever tool the session runs in. It adds a few seconds and a small API cost per Done message. If it fails or takes more than 15 seconds, the plugin falls back to `last-message`. Waiting messages always use `last-message`.
 
 ## Storing secrets
 
@@ -101,9 +101,9 @@ Terminal asks for the value twice. To replace an existing value, add `-U`. To re
 security delete-generic-password -s awty-telegram
 ```
 
-The first time the plugin reads an item, macOS may ask whether `security` may access it. Choose **Always Allow**.
+The first time are-we-there-yet reads an item, macOS may ask whether `security` may access it. Choose **Always Allow**.
 
-**Environment variables** only work if Claude Code itself was started with them set. The desktop app usually doesn't see variables from your shell profile, so prefer Keychain there.
+**Environment variables** only work if the tool (Claude Code, Codex or Antigravity) was itself started with them set. The desktop app usually doesn't see variables from your shell profile, so prefer Keychain there.
 
 ## `/awty` command reference
 
@@ -157,4 +157,4 @@ For debugging and development:
 | `AWTY_HOME` | Use a different data folder instead of `~/.config/are-we-there-yet` |
 | `AWTY_DRY_RUN=1` | Print what would be sent instead of sending |
 | `AWTY_SYNC=1` | Send in the foreground instead of a background process |
-| `AWTY_DISABLE=1` | Turn the plugin off completely for that process |
+| `AWTY_DISABLE=1` | Turn are-we-there-yet off completely for that process |

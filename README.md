@@ -4,7 +4,7 @@
 
 It sends you a message when a session:
 
-- **is waiting for you**: Claude asked a question, or needs permission to run something
+- **is waiting for you**: the agent asked a question, or needs permission to run something
 - **has finished a task** and handed control back
 
 Each message shows which session it's from and what happened, so you can walk away from long tasks and come back at the right moment.
@@ -59,7 +59,7 @@ Out of the box only **macOS notifications** are on. To get messages on your phon
 
 ## The `/awty` command
 
-Type `/awty` in any session to see or change settings. The plugin handles the command itself, so it never reaches Claude and costs no tokens.
+Type `/awty` in a Claude Code session to see or change settings (`awty` without the slash in Codex). are-we-there-yet handles the command itself, so it never reaches the model and costs no tokens.
 
 | Command | What it does |
 |---|---|
@@ -88,7 +88,7 @@ Full list: [Configuration → `/awty` reference](docs/configuration.md#awty-comm
 | [Supported tools](docs/tools.md) | What works in Claude Code, Codex CLI and Antigravity, and how to install each |
 | [Channels](docs/channels.md) | Step-by-step setup for each service: Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assistant, macOS, Apprise |
 | [Configuration](docs/configuration.md) | Config files, every setting and its default, filters, secrets, the full `/awty` grammar |
-| [How it works](docs/how-it-works.md) | Which Claude Code events trigger messages, how names and summaries are chosen, where data is stored |
+| [How it works](docs/how-it-works.md) | Which events trigger messages in each tool, how names and summaries are chosen, where data is stored |
 | [Troubleshooting](docs/troubleshooting.md) | Nothing arrives, duplicate messages, errors and how to fix them |
 
 ---

@@ -9,7 +9,7 @@ A channel is a place messages go. Turn channels on with the `channels` list in y
 }
 ```
 
-Your global config lives at `~/.config/are-we-there-yet/config.json`; create it if it doesn't exist. After editing, run `/awty test` in a Claude Code session. You don't need to restart anything, because the plugin re-reads the config on every event.
+Your global config lives at `~/.config/are-we-there-yet/config.json`; create it if it doesn't exist. After editing, run `awty test` in a terminal (or `/awty test` in a Claude Code session, `awty test` in Codex). You don't need to restart anything, because the config is re-read on every event, for all tools.
 
 **Keep tokens out of the file.** Any value can be written as `keychain:<name>` (read from the macOS Keychain) or `env:<VARIABLE>` (read from an environment variable) instead of the literal secret. See [Storing secrets](configuration.md#storing-secrets).
 
