@@ -39,11 +39,25 @@ test('always bypasses duration, debounce and away for done', () => {
   assert.equal(shouldNotify({ kind: 'done', source: 'stop', cfg: c, state: { turnStartedAt: NOW, lastDoneSentAt: NOW }, now: NOW, idleSec: 0 }).ok, true);
 });
 
-test('notification waiting deduped against recent question alert', () => {
-  const state = { lastWaitingSentAt: NOW - 30_000 };
-  assert.equal(shouldNotify({ kind: 'waiting', source: 'notification', cfg: cfg(), state, now: NOW, idleSec: null }).ok, false);
+test('notification waiting deduped against recent question alert only', () => {
+  const state = { lastWaitingSentAt: NOW - 30_000, lastQuestionSentAt: NOW - 30_000 };
+  const r = shouldNotify({ kind: 'waiting', source: 'notification', cfg: cfg(), state, now: NOW, idleSec: null });
+  assert.deepEqual(r, { ok: false, reason: 'duplicate of a question alert' });
   assert.equal(shouldNotify({ kind: 'waiting', source: 'question', cfg: cfg(), state, now: NOW, idleSec: null }).ok, true);
-  assert.equal(shouldNotify({ kind: 'waiting', source: 'notification', cfg: cfg(), state: { lastWaitingSentAt: NOW - 130_000 }, now: NOW, idleSec: null }).ok, true);
+  assert.equal(shouldNotify({ kind: 'waiting', source: 'notification', cfg: cfg(), state: { lastQuestionSentAt: NOW - 130_000 }, now: NOW, idleSec: null }).ok, true);
+  // a recent permission alert does not suppress another permission alert
+  assert.equal(shouldNotify({ kind: 'waiting', source: 'notification', cfg: cfg(), state: { lastWaitingSentAt: NOW - 30_000 }, now: NOW, idleSec: null }).ok, true);
+});
+
+test('skip reasons are specific and readable', () => {
+  const r = (kind, c, state = {}, idleSec = null, source = 'stop') => shouldNotify({ kind, source, cfg: c, state, now: NOW, idleSec }).reason;
+  assert.equal(r('done', cfg({ enabled: false })), 'notifications off');
+  assert.equal(r('done', cfg({ events: { done: false } })), 'done messages off');
+  assert.equal(r('waiting', cfg({ events: { waiting: false } })), 'waiting messages off');
+  assert.equal(r('paused', cfg({ events: { paused: false } })), 'paused messages off');
+  assert.equal(r('done', cfg(), { turnStartedAt: NOW - 41_000 }), 'too short (41s < 60s)');
+  assert.equal(r('done', cfg({ filters: { minDurationSec: 0, debounceSec: 60 } }), { lastDoneSentAt: NOW - 20_000 }), 'debounced (last Done 20s ago, limit 60s)');
+  assert.equal(r('done', cfg({ filters: { minDurationSec: 0, onlyWhenAwaySec: 120 } }), {}, 12), 'you were active (idle 12s < 120s)');
 });
 
 test('getIdleSeconds parses ioreg and degrades', () => {

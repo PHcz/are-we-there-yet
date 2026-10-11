@@ -9,6 +9,7 @@ import { tmpHome } from './helpers.mjs';
 import { readJson, writeJson } from '../lib/jsonfile.mjs';
 import { globalConfigPath, projectConfigPath } from '../lib/paths.mjs';
 import { runCli } from '../lib/cli.mjs';
+import { logDecision } from '../lib/decisions.mjs';
 
 const AWTY = fileURLToPath(new URL('../bin/awty.mjs', import.meta.url));
 let savedHome, cwd, outBuf, errBuf;
@@ -85,4 +86,32 @@ test('bin/awty.mjs with no args and piped stdin prints help instead of acting as
   assert.equal(res.status, 0);
   assert.match(res.stdout, /awty install <claude\|codex\|agy>/);
   assert.doesNotMatch(res.stdout, /decision/);
+});
+
+test('status shows recent decisions, or says nothing yet', async () => {
+  await runCli(['status'], io());
+  assert.match(outBuf, /Recent:\n  \(nothing yet\)/);
+  outBuf = '';
+  for (let i = 0; i < 7; i++) logDecision({ tool: 'codex', session: `s${i}`, kind: 'done', outcome: 'skipped: too short (1s < 60s)' });
+  await runCli(['status'], io());
+  assert.match(outBuf, /Recent:\n(  .* · s\d\n){5}\nHooks:/);
+  assert.ok(!outBuf.includes('· s1\n') && outBuf.includes('· s6\n'));
+});
+
+test('status explains an unknown Claude install state', async () => {
+  const run = () => ({ error: Object.assign(new Error('x'), { code: 'ENOENT' }) });
+  await runCli(['status'], { ...io(), run });
+  assert.match(outBuf, /claude\s+user\s+unknown \(claude CLI not found\)/);
+});
+
+test('help lists paused=', async () => {
+  await runCli(['help'], io());
+  assert.match(outBuf, /waiting= paused= channel=/);
+});
+
+test('awty test with no channels explains and fails', async () => {
+  writeJson(globalConfigPath(), { channels: [] });
+  assert.equal(await runCli(['test'], io()), 1);
+  assert.match(outBuf, /Sent: \(none\)/);
+  assert.match(errBuf, /No channels configured\. Add one: see docs\/channels\.md/);
 });
