@@ -63,7 +63,7 @@ What `awty install <tool>` changes:
 
 | Tool | Change |
 |---|---|
-| `claude` | Runs `claude plugin marketplace add <this package's folder>` and `claude plugin install are-we-there-yet@are-we-there-yet-local`. If the plugin is already installed, it runs `claude plugin marketplace update are-we-there-yet-local` and `claude plugin update are-we-there-yet@are-we-there-yet-local` instead. User-wide only. |
+| `claude` | Always runs `claude plugin marketplace add <this package's folder>` and `claude plugin install are-we-there-yet@are-we-there-yet-local`. If the plugin was already installed, it then also runs `claude plugin marketplace update are-we-there-yet-local` and `claude plugin update are-we-there-yet@are-we-there-yet-local`. User-wide only. |
 | `codex` | Adds (or replaces) its three entries in `hooks.json`. Your other hooks are left alone. Hooks have no awty-set time limit. |
 | `agy` | Adds an `are-we-there-yet` key to `hooks.json` with a `PreToolUse` hook (matcher `ask_question\|ask_permission`) and a `Stop` hook, each with a 10 second limit. |
 
@@ -76,7 +76,10 @@ Running install again is safe: it replaces awty's own entries and doesn't duplic
 | The hooks file isn't valid JSON, or its top level isn't an object | `<file> is not valid JSON (<reason>); fix it by hand first` |
 | The file has the wrong shape | `<file>: "hooks" is not an object; fix it by hand first` (or `"hooks.Stop" is not an array`, and so on) |
 | `awty install claude --project` | `Claude Code plugins install per user; --project is not supported for claude` |
-| No tool given, or an unknown one | `which tool? use: awty install <claude\|codex\|agy>` or `unknown tool "x" (use claude, codex or agy)` |
+| No tool given, or an unknown one | `which tool? use: awty install <claude\|codex\|agy>` (`awty uninstall <…>` for uninstall) or `unknown tool "x" (use claude, codex or agy)` |
+| `claude plugin marketplace add` fails | `claude plugin marketplace add failed: <output>` |
+| `claude plugin install` fails | `claude plugin install failed: <output>` |
+| `claude plugin uninstall` fails (`awty uninstall claude`) | `claude plugin uninstall failed: <output>` |
 | The `claude` command isn't on your `PATH` | `claude not found on PATH.` followed by the two commands to run yourself (below) |
 
 If `awty install claude` can't run, do it by hand. Replace the folder with where awty lives:
@@ -117,7 +120,7 @@ Other things to know:
 
 ## Removing everything
 
-After running `awty uninstall` for each tool and removing the package, delete what is left:
+First run `awty uninstall <tool> --project` in each project where you used `--project`. Then run `awty uninstall` for each tool and remove the package, and delete what is left:
 
 1. The data folder, which holds your global config, session state and logs:
 
@@ -133,3 +136,9 @@ security delete-generic-password -s awty-telegram
 
 3. Backup files next to the tool configs: `~/.codex/hooks.json.awty-backup`, `~/.gemini/config/hooks.json.awty-backup`, and any `*.awty-backup` in project folders.
 4. Project settings files you created: `<project>/.claude/awty.json`.
+5. Any `export …` lines you added to your shell profile for `env:` secrets.
+
+Notes:
+
+- The settings folder is `$AWTY_HOME` if you set it, and Codex's hooks file is under `$CODEX_HOME` if you set it.
+- A project-level uninstall can leave an almost empty `.codex/hooks.json` (`{"hooks": {}}`) or `.agents/hooks.json` and their folders, which you can delete.

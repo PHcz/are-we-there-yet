@@ -7,7 +7,7 @@ What are-we-there-yet can't do, or does differently from what you might expect.
 **Antigravity CLI**
 - No Waiting message for command approvals ("Run this command?"). Antigravity runs its hook for every command and doesn't say when it's waiting for you, so only explicit questions (`ask_question`, `ask_permission`) send a Waiting message. See [Supported tools](tools.md#antigravity-cli).
 - No in-session command. Use `awty status` and `awty set …` in a terminal.
-- A name can only be set for all Antigravity sessions (`awty set global name="…"`), not per session.
+- Antigravity has no per-session name. A name can be set per project (`awty set project name="…"`) or globally (`awty set global name="…"`).
 
 **Codex CLI**
 - No question alerts, because Codex has no question tool. You get ⏳ permission requests and Done.

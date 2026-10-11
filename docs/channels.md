@@ -22,7 +22,7 @@ Your global config lives at `~/.config/are-we-there-yet/config.json`; create it 
 | [Bark](#bark) | Free | iOS only | Breaks through Focus modes | ✅ |
 | [Gotify](#gotify) | Free (self-hosted) | Android only | Self-hosters | ✅ server |
 | [Home Assistant](#home-assistant) | Free | via HA app | You already run Home Assistant | ✅ |
-| [macOS](#macos) | Free | none | At your desk. On by default. | ✅ |
+| [macOS](#macos) | Free | none | At your desk. On by default on macOS. | ✅ |
 | [Apprise](#apprise) | Free | depends | Anything else: SMS, Signal, Matrix, email… | ✅ (via ntfy) |
 
 **Tested live** means a real message was sent to the real service (October 2026): it was delivered and shown correctly on the phone (Gotify: stored by a real Gotify server; Apprise: delivered through Apprise to ntfy; Home Assistant: through the companion app). Every channel has been checked this way, and all of them are also covered by automated tests against a simulated server.
@@ -58,7 +58,7 @@ export AWTY_SLACK_WEBHOOK='https://hooks.slack.com/services/…'
 
 You need a **bot token**, which works as the bot's password, and your **chat ID**, which tells the bot whose chat to post into.
 
-**1. Create a bot.** In Telegram, open a chat with **@BotFather** (blue checkmark) and send `/newbot`. Choose a display name, e.g. `Claude Pings`, and a username ending in `bot`, e.g. `jane_claude_bot`. BotFather replies with a token like `7712345678:AAHk3…`.
+**1. Create a bot.** In Telegram, open a chat with **@BotFather** (blue checkmark) and send `/newbot`. Choose a display name, e.g. `Agent Pings`, and a username ending in `bot`, e.g. `jane_claude_bot`. BotFather replies with a token like `7712345678:AAHk3…`.
 
 **2. Start the bot.** Open your new bot via `https://t.me/<bot_username>`, tap **Start**, and send `hi`. A bot can't message you until you've messaged it first.
 
@@ -276,7 +276,7 @@ Uses the Home Assistant companion app's notify service.
 
 ## macOS
 
-On by default. Shows a native notification banner. It needs no setup, but it only helps when you're at your Mac.
+On by default on macOS. Shows a native notification banner. It needs no setup, but it only helps when you're at your Mac.
 
 ```json
 { "macos": { "sound": "Glass" } }
@@ -292,7 +292,7 @@ Works on macOS only; on Linux remove `macos` from `channels`. If no banner appea
 
 ## Apprise
 
-[Apprise](https://github.com/caronc/apprise) is a separate tool that speaks to 170+ services: SMS (Twilio and others), Signal, WhatsApp, Matrix, email, Microsoft Teams, Pushbullet, LINE and more. The plugin calls it when it's installed.
+[Apprise](https://github.com/caronc/apprise) is a separate tool that speaks to 170+ services: SMS (Twilio and others), Signal, WhatsApp, Matrix, email, Microsoft Teams, Pushbullet, LINE and more. awty calls it when it's installed.
 
 1. Install it:
 

@@ -70,7 +70,7 @@ api · 14:32                              ← project folder and time
 | 2 | the session title, if you used `/rename` | Codex's automatic thread title | — |
 | 3 | `<project folder> · <first 6 words of your first message>` | same | same |
 
-The first 200 characters of your first prompt in each session are kept in `sessions/<id>.json` so the name stays stable. They are deleted with the session file after 14 days. Nothing else of your prompts is stored.
+Up to the first 200 characters of your first prompt in each session, for all tools, are kept in `sessions/<id>.json` so the name stays stable. They are deleted with the session file after 14 days. Nothing else of your prompts is stored.
 
 **Summary:**
 
@@ -118,7 +118,7 @@ Recent:
   2026-10-11T14:35:40.456Z codex done skipped: too short (41s < 60s) · api
 ```
 
-Each line is `<time> <tool> <kind> <outcome> · <name>`. `kind` is `done`, `waiting` or `paused`. The name is never taken from your prompts: it is the `name` you set, Codex's thread title, or the project folder name. The file keeps the last 100 lines and contains no message text.
+Each line is `<time> <tool> <kind> <outcome> · <name>`. `kind` is `done`, `waiting` or `paused`. awty never copies prompt text into it; the name is the one you set, Codex's own thread title, or the project folder name. The file keeps the last 100 lines and contains no message text.
 
 | Outcome | Meaning |
 |---|---|
@@ -140,7 +140,7 @@ Everything lives in `~/.config/are-we-there-yet/` (or `$AWTY_HOME`), shared by a
 | Path | What |
 |---|---|
 | `config.json` | Your global settings |
-| `sessions/<id>.json` | Per-session state: in-session overrides, start time of the current request, when the last message was sent, and the first 200 characters of your first prompt (used for the session name). Deleted after 14 days. Codex and Antigravity sessions are stored as `codex_<id>.json` and `agy_<id>.json`. |
+| `sessions/<id>.json` | Per-session state: in-session overrides, start time of the current request, when the last message was sent, and up to the first 200 characters of your first prompt, for all tools (used for the session name). Deleted after 14 days. Codex and Antigravity sessions are stored as `codex_<id>.json` and `agy_<id>.json`. |
 | `jobs/` | Messages waiting to be sent. Each file lives for a fraction of a second. |
 | `error.log` | Last 200 errors. `awty status` and `/awty` show the newest. |
 | `decisions.log` | Last 100 decisions: sent or skipped, and why. No message text. See [The decision log](#the-decision-log). |
@@ -151,14 +151,14 @@ The hooks themselves are registered in each tool's own configuration: the Claude
 
 ## Privacy
 
-- **What a message can contain.** Everything below goes to the channels you enabled, and nowhere else:
+- **What a message can contain.** Everything below goes to the channels you enabled and nowhere else, unless you turn on `summary=llm` (see the `summary=llm` bullet below):
   - the session name, which can include the first words of your first prompt
   - the agent's last reply (or the part of it that fits the summary limit)
   - question text and option labels
   - the command or description the agent wants permission to run
   - labels of running background jobs, including shell commands
   - the project folder name and the time
-- **What stays on your machine.** The first 200 characters of your first prompt per session (in `sessions/<id>.json`, for 14 days), settings, `error.log` and `decisions.log`. The decision log never contains prompt or message text.
+- **What stays on your machine.** Up to the first 200 characters of your first prompt per session, for all tools (in `sessions/<id>.json`, for 14 days), settings, `error.log`, `decisions.log` and the short-lived `jobs/` files (they hold the message being sent and your settings for a fraction of a second). The decision log never contains prompt or message text.
 - **`summary=llm`.** The text to summarise is sent to Claude Haiku through your own `claude` CLI login, as a separate short session. For Claude Code that's the end of the conversation (up to 4000 characters). For Codex and Antigravity it's the agent's last message. Without the `claude` CLI, the normal last-message summary is used.
 - **Secrets.** Write tokens as `keychain:` or `env:` values so they aren't in your config file. They are read only when sending and are never logged. See [Storing secrets](configuration.md#storing-secrets).
 - A message sent through a third-party service (Telegram, Slack, Pushover, …) is stored by that service under its own rules. Use a private channel, and think before running an agent on code you can't share.

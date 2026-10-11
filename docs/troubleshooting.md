@@ -107,13 +107,15 @@ When you *add* a Keychain item, Terminal asks for the value (on some macOS versi
 
 ## Testing from a terminal
 
+Replace `~/are-we-there-yet` with wherever are-we-there-yet is installed.
+
 Simulate a "Done" event and print what would be sent, without sending anything:
 
 ```bash
 echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"Stop\",\"last_assistant_message\":\"hi\"}" | AWTY_DRY_RUN=1 AWTY_SYNC=1 ~/are-we-there-yet/bin/run.sh
 ```
 
-Send a real test message from Terminal. Replace `~/are-we-there-yet` with wherever are-we-there-yet is installed:
+Send a real test message from Terminal:
 
 ```bash
 echo "{\"session_id\":\"t\",\"cwd\":\"$PWD\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"/awty test\"}" | AWTY_SYNC=1 ~/are-we-there-yet/bin/run.sh

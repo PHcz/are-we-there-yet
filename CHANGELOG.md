@@ -12,17 +12,21 @@ All notable changes to are-we-there-yet. The format follows [Keep a Changelog](h
 - ⏸ **Paused** message when Claude Code stops while background jobs are still running.
 - Per-message switches: `done=`, `waiting=` and `paused=`.
 - Decision log: `awty status` shows the last 5 decisions (`Recent:`) and why each message was sent or skipped. Stored in `decisions.log` without message text.
-- The default channel is `macos` on macOS and none elsewhere, so awty no longer tries `macos` on Linux. Documented Linux gaps: no `macos` channel, no `onlyWhenAwaySec`, no `keychain:` secrets.
+- Documented Linux gaps: no `macos` channel, no `onlyWhenAwaySec`, no `keychain:` secrets.
 - Documentation: install details, removing everything, a "Why didn't I get a message?" checklist, a limitations page and a Privacy section.
 
 ### Changed
+- The default channel is `macos` on macOS only and none elsewhere, so awty no longer tries `macos` on Linux.
 - Waiting de-duplication is narrower: a ⏳ permission alert is skipped only when a ❓ question alert for the same session went out in the previous 2 minutes.
 - A Done after a Waiting message in the same task skips only the minimum-duration filter; debounce and away-from-keyboard still apply.
 - Errors in `error.log` carry a single channel prefix (for example `telegram: missing chatId`).
-- `bin/run.sh` looks for Node in more places (including asdf, fnm and the highest nvm version) and logs `hook: node not found …` when it finds none.
+- `bin/run.sh` looks for Node in more places (including asdf, fnm and the highest nvm major version) and logs `hook: node not found …` when it finds none.
 - `awty uninstall claude` also removes the local plugin marketplace.
 
 ### Fixed
+- The stored first prompt is cut to 200 characters for every tool, including Antigravity.
+- `awty test` no longer repeats the channel name in failure lines, and `awty set` exits with code 1 when a config file isn't valid JSON.
+- `awty uninstall` with no tool names the right command in its message.
 - Background-job and subagent wake-ups no longer reset the start of a task, so the final Done keeps its full duration and isn't dropped as too short.
 - Discord messages can no longer ping `@everyone` or other mentions.
 - Bark messages are grouped under `awty`.

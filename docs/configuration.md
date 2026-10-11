@@ -171,7 +171,7 @@ With no scope word, changes apply to **this session only**. `global` writes to `
 | `max=N` | `summary.maxChars` |
 | `name="…"` | session name |
 
-`on`/`off` also accept `true`/`false`, `yes`/`no` and `1`/`0`. You can combine several settings in one command:
+The bare words are exactly `on` and `off`. The aliases `true`/`false`, `yes`/`no` and `1`/`0` work only as values (`done=yes`). You can combine several settings in one command:
 
 ```
 /awty channel=telegram min=300 away=120
@@ -220,7 +220,7 @@ Notes:
 | Code | Meaning |
 |---|---|
 | `0` | OK |
-| `1` | `install`/`uninstall` failed (the reason is printed), `awty test` has no channels, or at least one channel failed in `awty test` |
+| `1` | `install`/`uninstall` failed (the reason is printed), `awty test` has no channels, at least one channel failed in `awty test`, or `awty set` hit a config file that isn't valid JSON |
 | `2` | Usage error: unknown command, `awty set` without `global`/`project` or without a `key=value`, or an invalid setting |
 
 **Three ways to change the same setting**
