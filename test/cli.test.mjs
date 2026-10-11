@@ -115,3 +115,18 @@ test('awty test with no channels explains and fails', async () => {
   assert.match(outBuf, /Sent: \(none\)/);
   assert.match(errBuf, /No channels configured\. Add one: see docs\/channels\.md/);
 });
+
+test('failureLine does not double the channel prefix', async () => {
+  const { failureLine } = await import('../lib/cli.mjs');
+  assert.equal(failureLine({ name: 'ntfy', error: 'ntfy: HTTP 500' }), 'Failed: ntfy: HTTP 500');
+  assert.equal(failureLine({ name: 'ntfy', error: 'HTTP 500' }), 'Failed: ntfy: HTTP 500');
+});
+
+test('set on a broken config file exits 1 and leaves the file unchanged', async () => {
+  const p = globalConfigPath();
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, '{ broken');
+  assert.equal(await runCli(['set', 'global', 'min=5'], io()), 1);
+  assert.match(errBuf, /is not valid JSON/);
+  assert.equal(fs.readFileSync(p, 'utf8'), '{ broken');
+});

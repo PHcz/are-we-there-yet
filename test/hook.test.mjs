@@ -191,3 +191,11 @@ test('filters pass but no channels configured: logged as such, no job', () => {
   assert.deepEqual(handle(ask, { now: NOW, idle: noIdle }), {});
   assert.match(readRecentDecisions(1)[0], /^\S+ claude waiting no channels configured · api$/);
 });
+
+test('stored first prompt is truncated to 200 chars for events carrying firstPrompt (agy-style)', () => {
+  writeJson(globalConfigPath(), { channels: ['telegram'] });
+  const event = { tool: 'agy', sessionId: 'a1', type: 'done', cwd: '/x/api', projectDir: '/x/api', text: 'ok', firstPrompt: 'p'.repeat(500) };
+  const { job } = coreHandle(event, { now: NOW, idle: noIdle });
+  assert.ok(job);
+  assert.equal(loadState('agy:a1').firstPrompt.length, 200);
+});

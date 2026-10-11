@@ -229,7 +229,7 @@ test('claude uninstall reports ENOENT and failures, and succeeds otherwise', () 
 
 test('missing tool name is a clear error', () => {
   assert.throws(() => install(undefined), /which tool\? use: awty install <claude\|codex\|agy>/);
-  assert.throws(() => uninstall(undefined), /which tool\?/);
+  assert.throws(() => uninstall(undefined), /which tool\? use: awty uninstall <claude\|codex\|agy>/);
 });
 
 test('installStatus flags stale paths for codex and agy', () => {
