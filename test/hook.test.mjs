@@ -172,3 +172,22 @@ test('every decision is logged with outcome and no content', () => {
   assert.match(lines[1], /^\S+ claude waiting sent · .+$/);
   assert.ok(!lines.join('').includes('SECRET'));
 });
+
+test('decision log never contains prompt text, sent or skipped; ends with the project folder name', () => {
+  saveState('s1', { firstPrompt: 'my password is hunter2 please rotate', turnStartedAt: NOW - 10_000 });
+  const ask = { ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } };
+  assert.ok(handle(ask, { now: NOW, idle: noIdle }).job);
+  handle({ ...base, hook_event_name: 'Stop', last_assistant_message: 'x' }, { now: NOW + 1000, idle: noIdle });
+  const log = readRecentDecisions(10).join('\n');
+  assert.ok(!log.includes('hunter2') && !log.includes('password'));
+  const lines = log.split('\n');
+  assert.equal(lines.length, 2);
+  for (const l of lines) assert.match(l, / · api$/);
+});
+
+test('filters pass but no channels configured: logged as such, no job', () => {
+  writeJson(globalConfigPath(), { channels: [] });
+  const ask = { ...base, hook_event_name: 'PreToolUse', tool_name: 'AskUserQuestion', tool_input: { questions: [{ question: 'Q?' }] } };
+  assert.deepEqual(handle(ask, { now: NOW, idle: noIdle }), {});
+  assert.match(readRecentDecisions(1)[0], /^\S+ claude waiting no channels configured · api$/);
+});

@@ -90,7 +90,7 @@ test('bin/awty.mjs with no args and piped stdin prints help instead of acting as
 
 test('status shows recent decisions, or says nothing yet', async () => {
   await runCli(['status'], io());
-  assert.match(outBuf, /Recent:\n  \(nothing yet\)/);
+  assert.match(outBuf, /Recent: \(nothing yet\)\n\nHooks:/);
   outBuf = '';
   for (let i = 0; i < 7; i++) logDecision({ tool: 'codex', session: `s${i}`, kind: 'done', outcome: 'skipped: too short (1s < 60s)' });
   await runCli(['status'], io());
@@ -101,7 +101,7 @@ test('status shows recent decisions, or says nothing yet', async () => {
 test('status explains an unknown Claude install state', async () => {
   const run = () => ({ error: Object.assign(new Error('x'), { code: 'ENOENT' }) });
   await runCli(['status'], { ...io(), run });
-  assert.match(outBuf, /claude\s+user\s+unknown \(claude CLI not found\)/);
+  assert.match(outBuf, /claude\s+user\s+unknown \(couldn't run the claude CLI\)/);
 });
 
 test('help lists paused=', async () => {

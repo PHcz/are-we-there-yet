@@ -58,6 +58,10 @@ test('skip reasons are specific and readable', () => {
   assert.equal(r('done', cfg(), { turnStartedAt: NOW - 41_000 }), 'too short (41s < 60s)');
   assert.equal(r('done', cfg({ filters: { minDurationSec: 0, debounceSec: 60 } }), { lastDoneSentAt: NOW - 20_000 }), 'debounced (last Done 20s ago, limit 60s)');
   assert.equal(r('done', cfg({ filters: { minDurationSec: 0, onlyWhenAwaySec: 120 } }), {}, 12), 'you were active (idle 12s < 120s)');
+  // seconds are floored, so a skip never reads "60s < 60s"
+  assert.equal(r('done', cfg(), { turnStartedAt: NOW - 59_600 }), 'too short (59s < 60s)');
+  assert.equal(r('done', cfg({ filters: { minDurationSec: 0, debounceSec: 60 } }), { lastDoneSentAt: NOW - 59_600 }), 'debounced (last Done 59s ago, limit 60s)');
+  assert.equal(r('done', cfg({ filters: { minDurationSec: 0, onlyWhenAwaySec: 120 } }), {}, 119.6), 'you were active (idle 119s < 120s)');
 });
 
 test('getIdleSeconds parses ioreg and degrades', () => {
