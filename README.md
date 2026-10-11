@@ -67,6 +67,7 @@ Type `/awty` in a Claude Code session to see or change settings (`awty` without 
 | `/awty test` | Send a test message to every channel |
 | `/awty off` / `/awty on` | Mute or unmute this session |
 | `/awty name="auth refactor"` | Name this session in messages |
+| `/awty done=off` / `waiting=off` / `paused=off` | Choose which kinds of message you get. See [Choosing which messages you get](docs/configuration.md#choosing-which-messages-you-get). |
 | `/awty min=300` | Only report "Done" for tasks longer than 5 minutes |
 | `/awty away=120` | Only notify if you've been away from the keyboard for 2+ minutes (macOS) |
 | `/awty channel=telegram,macos` | Choose where messages go |

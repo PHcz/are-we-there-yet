@@ -57,6 +57,32 @@ You don't need to restart anything after changing settings: they are re-read on 
 | `name` | none | Session name used in messages (normally set per session with `/awty name="…"`) |
 | `<channel>` | — | Settings for each channel, e.g. `"telegram": {…}`. See [Channels](channels.md). |
 
+### Choosing which messages you get
+
+Each kind of message has its own switch. All three are on by default.
+
+| Switch | Message | Tools |
+|---|---|---|
+| `done=on\|off` | ✅ Done | all |
+| `waiting=on\|off` | ❓ and ⏳ Waiting for you. Questions and permission requests share this one switch. | all |
+| `paused=on\|off` | ⏸ Paused | Claude Code |
+
+Set them for one session, one project, or everything:
+
+```
+/awty paused=off                 this session (Claude Code; in Codex type: awty paused=off)
+awty set project done=off        the project in the current folder, from a terminal
+awty set global waiting=off      every session, from a terminal
+```
+
+Common combinations:
+
+- **Only when I'm needed:** `done=off paused=off`
+- **Only when it's finished:** `waiting=off paused=off`
+- **No early "paused" pings:** `paused=off`
+
+`awty status` (or `/awty`) shows the current state on its `Events:` line.
+
 ### Which filters apply to which message
 
 | | ✅ Done | ❓/⏳ Waiting |
