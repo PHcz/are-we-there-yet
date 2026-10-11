@@ -22,11 +22,13 @@ else
     "$HOME/.volta/bin/node" "$HOME/.asdf/shims/node" "$HOME/.local/share/fnm/aliases/default/bin/node"; do
     case "$n" in /*) [ -x "$n" ] && exec "$n" "$DIR/awty.mjs" hook "$@" ;; esac
   done
-  # nvm last, computed lazily. `sort -V` is not POSIX, so keep the last glob match
-  # (lexical order: good enough, it can pick v9 over v20 only if both are installed).
-  NVM_NODE=""
-  for n in "$HOME"/.nvm/versions/node/*/bin/node; do
-    [ -x "$n" ] && NVM_NODE="$n"
+  # nvm last, computed lazily: the highest major version installed (`sort -V` is not POSIX).
+  NVM_NODE=""; NVM_BEST=-1
+  for n in "$HOME"/.nvm/versions/node/v*/bin/node; do
+    [ -x "$n" ] || continue
+    v="${n%/bin/node}"; v="${v##*/v}"; major="${v%%.*}"
+    case "$major" in ''|*[!0-9]*) continue ;; esac
+    if [ "$major" -ge "$NVM_BEST" ]; then NVM_BEST="$major"; NVM_NODE="$n"; fi
   done
   [ -n "$NVM_NODE" ] && exec "$NVM_NODE" "$DIR/awty.mjs" hook "$@"
 fi
