@@ -30,10 +30,10 @@ Works with **Telegram, ntfy, Pushover, Slack, Discord, Bark, Gotify, Home Assist
 
 ## Quick start
 
-**1. Install** (needs Node.js 20 or newer). are-we-there-yet isn't on npm yet; install it straight from GitHub. The repository is private for now, so you need access to it:
+**1. Install** (needs Node.js 20 or newer):
 
 ```bash
-npm install -g github:PHcz/are-we-there-yet
+npm install -g @phcz/are-we-there-yet
 ```
 
 Or work from a clone, so local edits take effect immediately:
