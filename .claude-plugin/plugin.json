@@ -1,6 +1,6 @@
 {
   "name": "are-we-there-yet",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Pings you on Telegram, ntfy, Pushover, Slack, Discord, macOS and more when Claude Code is waiting for you or has finished a task. Also supports Codex CLI and Antigravity via the awty command.",
   "author": { "name": "Petr Hložánek" },
   "license": "MIT"

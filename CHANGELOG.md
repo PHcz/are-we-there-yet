@@ -2,6 +2,11 @@
 
 All notable changes to are-we-there-yet. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.1] - 2026-10-12
+
+### Changed
+- Published to npm as `@phcz/are-we-there-yet`. Install with `npm install -g @phcz/are-we-there-yet`; the install and upgrade instructions now say so. No code changes.
+
 ## [0.2.0] - 2026-10-11
 
 ### Added

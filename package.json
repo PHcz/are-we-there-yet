@@ -1,6 +1,6 @@
 {
   "name": "@phcz/are-we-there-yet",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Get pinged on Telegram, ntfy, Pushover, Slack, macOS and more when Claude Code, Codex CLI or Antigravity is waiting for you or done",
   "bin": {
