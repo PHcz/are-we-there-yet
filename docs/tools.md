@@ -96,7 +96,7 @@ claude plugin install are-we-there-yet@are-we-there-yet-local
 
 ## Upgrading and uninstalling
 
-**Update.** Run `npm install -g github:PHcz/are-we-there-yet` again (or `git pull` in your clone), then re-run `awty install <tool>` for each tool you use. This refreshes the hook paths and updates the Claude Code plugin.
+**Update.** Run `npm install -g @phcz/are-we-there-yet@latest` (or `git pull` in your clone), then re-run `awty install <tool>` for each tool you use. This refreshes the hook paths and updates the Claude Code plugin.
 
 **Claude Code keeps a cached copy of the plugin** and only refreshes it when the version number changes. If Claude doesn't pick up a change, run `awty uninstall claude && awty install claude`.
 
