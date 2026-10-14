@@ -107,6 +107,59 @@ test('Notification permission prompt sends; a second one 1 s later is also sent;
   assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'auth_success', message: 'x' }, { now: NOW + 999_999, idle: noIdle }), {});
 });
 
+test('plugin_notification sends a waiting job as "title: message"', () => {
+  const r = handle({
+    ...base, hook_event_name: 'Notification', notification_type: 'plugin_notification', title: 'Blast Radius',
+    message: 'Holding rm -rf build: would delete 9 files (1.2 MB). Runs by itself in 30s unless you press Cancel.',
+  }, { now: NOW, idle: noIdle });
+  assert.equal(r.job.kind, 'waiting');
+  assert.equal(r.job.waitingReason, 'mod');
+  assert.match(r.job.summaryInput.text, /^Blast Radius: Holding rm -rf build/);
+  assert.equal(loadState('s1').lastWaitingSentAt, NOW);
+});
+
+test('plugin_notification without a title sends the message alone', () => {
+  const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'plugin_notification', message: 'Build is waiting' }, { now: NOW, idle: noIdle });
+  assert.equal(r.job.summaryInput.text, 'Build is waiting');
+});
+
+test('plugin_notification is not skipped as a duplicate of a recent question alert', () => {
+  saveState('s1', { lastQuestionSentAt: NOW - 30000 });
+  const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'plugin_notification', title: 'Blast Radius', message: 'Holding rm -rf build' }, { now: NOW, idle: noIdle });
+  assert.equal(r.job.waitingReason, 'mod');
+  const p = handle({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'Claude needs permission' }, { now: NOW, idle: noIdle });
+  assert.equal(p.job, undefined);
+});
+
+test('worker_permission_prompt sends a waiting job', () => {
+  const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'worker_permission_prompt', message: 'researcher needs permission for Bash' }, { now: NOW, idle: noIdle });
+  assert.equal(r.job.kind, 'waiting');
+  assert.equal(r.job.waitingReason, 'permission');
+  assert.equal(r.job.summaryInput.text, 'researcher needs permission for Bash');
+});
+
+test('agent_completed sends a Done with its own text, no duration, and leaves the session Done state alone', () => {
+  writeJson(globalConfigPath(), { channels: ['telegram'], summary: { mode: 'llm' }, filters: { debounceSec: 600 } });
+  saveState('s1', { turnStartedAt: NOW - 5_000, lastDoneSentAt: NOW - 10_000 });
+  const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'agent_completed', message: 'nightly-build finished' }, { now: NOW, idle: noIdle });
+  assert.equal(r.job.kind, 'done');
+  assert.equal(r.job.durationSec, null);
+  assert.equal(r.job.summaryInput.text, 'nightly-build finished');
+  assert.equal(r.job.summaryInput.mode, 'last-message');
+  assert.equal(r.job.summaryInput.transcriptPath, undefined);
+  assert.equal(loadState('s1').lastDoneSentAt, NOW - 10_000);
+  assert.equal(loadState('s1').lastSentAt, NOW);
+});
+
+test('agent_completed follows the done switch and the away filter', () => {
+  const done = { ...base, hook_event_name: 'Notification', notification_type: 'agent_completed', message: 'x failed' };
+  writeJson(globalConfigPath(), { channels: ['telegram'], filters: { onlyWhenAwaySec: 120 } });
+  assert.deepEqual(handle(done, { now: NOW, idle: () => 10 }), {});
+  assert.ok(handle(done, { now: NOW, idle: () => 300 }).job);
+  writeJson(globalConfigPath(), { channels: ['telegram'], events: { done: false } });
+  assert.deepEqual(handle(done, { now: NOW, idle: noIdle }), {});
+});
+
 test('idle_prompt notifications are ignored (Stop covers finished turns)', () => {
   assert.deepEqual(handle({ ...base, hook_event_name: 'Notification', notification_type: 'idle_prompt', message: 'x' }, { now: NOW, idle: noIdle }), {});
 });

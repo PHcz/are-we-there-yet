@@ -15,15 +15,20 @@ Antigravity  ─┘
 | Message | Claude Code | Codex CLI | Antigravity CLI |
 |---|---|---|---|
 | ✅ **Done**: the agent finished and handed control back | `Stop` | `Stop` | `Stop`, once the agent is fully idle |
+| ✅ **Done**: a background session ended | `Notification` (`agent_completed`) | — | — |
 | ⏸ **Paused**: the turn ended but background jobs are still running | `Stop` while jobs started with `run_in_background` haven't reported back | — | — |
 | ❓ **Waiting**: the agent asked you a question | `PreToolUse` on `AskUserQuestion` | — (Codex has no question tool) | `PreToolUse` on `ask_question` / `ask_permission` |
-| ⏳ **Waiting**: the agent needs permission | `Notification` (`permission_prompt`, `elicitation_dialog`, `agent_needs_input`) | `PermissionRequest` | — (Antigravity doesn't expose this) |
+| ⏳ **Waiting**: the agent, a subagent or a teammate needs permission | `Notification` (`permission_prompt`, `elicitation_dialog`, `agent_needs_input`, `worker_permission_prompt`) | `PermissionRequest` | — (Antigravity doesn't expose this) |
+| 📣 **Needs attention**: a mod wants your attention | `Notification` (`plugin_notification`) | — | — |
 | Turn start (used for the duration) | `UserPromptSubmit` | `UserPromptSubmit` | read from Antigravity's transcript |
 
 Details per tool:
 
 - **Claude Code.**
   - Claude Code also sends an "idle" notification about a minute after every finished turn. are-we-there-yet ignores it, because the Done message already covers that moment.
+  - A mod (a Claude Code plugin that changes its interface) can raise its own notification with `$.ui.notify(text, { title })`. It's sent as 📣 Needs attention, with the text `<title>: <text>`. It's switched on and off with `waiting=`, but unlike a ⏳ permission alert it's never skipped as a duplicate of a question. For example, the Blast Radius mod sends "Blast Radius: Holding rm -rf build: would delete 9 files…" when it holds a risky command.
+  - When a background session ends, Claude Code sends "`<label>` finished" or "`<label>` failed". It's sent as ✅ Done with that text as the summary, and without a duration. Only the `done` switch, `always` and the away-from-keyboard filter apply to it; it isn't counted by `debounceSec`, so it can't hold back the Done for your own task.
+  - Other Claude Code notifications (sign-in results, computer use starting or stopping, and so on) are ignored.
   - When a background job or subagent finishes, Claude Code wakes the session with an injected message. That isn't treated as a new request, so the Done at the real end still shows the full duration.
   - If another hook forced Claude to continue after a `Stop` (`stop_hook_active`), no Done is sent for that `Stop`.
 - **Codex CLI.**
@@ -75,7 +80,8 @@ Up to the first 200 characters of your first prompt in each session, for all too
 **Summary:**
 
 - **Done:** the agent's last message. Claude Code and Codex pass it to the hook directly. For Antigravity it's read from the session transcript.
-- **Waiting:** the question followed by `• option` lines, or the permission request.
+- **Done for a background session** (Claude Code): Claude Code's own line, e.g. "nightly-build finished".
+- **Waiting:** the question followed by `• option` lines, the permission request, or a mod's notification text.
 - **Paused** (Claude Code): the list of background jobs still running, then Claude's last message.
 
 Every summary keeps its line breaks and bullets and is limited to 8 non-empty lines and `summary.maxChars` characters (300 by default). Optionally, Done can use a one-line AI summary instead; see [Summaries](configuration.md#summaries).
@@ -156,6 +162,7 @@ The hooks themselves are registered in each tool's own configuration: the Claude
   - the agent's last reply (or the part of it that fits the summary limit)
   - question text and option labels
   - the command or description the agent wants permission to run
+  - the text of a mod's notification, and the label of a background session that ended
   - labels of running background jobs, including shell commands
   - the project folder name and the time
 - **What stays on your machine.** Up to the first 200 characters of your first prompt per session, for all tools (in `sessions/<id>.json`, for 14 days), settings, `error.log`, `decisions.log` and the short-lived `jobs/` files (they hold the message being sent and your settings for a fraction of a second). The decision log never contains prompt or message text.
