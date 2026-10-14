@@ -2,6 +2,13 @@
 
 All notable changes to are-we-there-yet. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- Claude Code: notifications from mods (`plugin_notification`, sent with `$.ui.notify`) are forwarded as ⏳ Waiting, as `<title>: <text>`. The Blast Radius mod uses this when it holds a risky command.
+- Claude Code: a subagent or teammate blocked on a permission request (`worker_permission_prompt`) sends ⏳ Waiting.
+- Claude Code: a finished or failed background session (`agent_completed`) sends ✅ Done with Claude Code's text and no duration. The minimum-duration and debounce filters don't apply to it, and it doesn't count toward the debounce or use `summary=llm`.
+
 ## [0.2.1] - 2026-10-12
 
 ### Changed

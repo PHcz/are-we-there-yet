@@ -98,6 +98,8 @@ Common combinations:
 
 ⏸ Paused follows the same rules as Done, except the debounce (it neither counts toward nor is blocked by `debounceSec`).
 
+A ✅ Done for a finished background session (Claude Code's `agent_completed`) has no task of its own in this session, so `minDurationSec` and `debounceSec` don't apply to it and it doesn't count toward the debounce. `events.done`, `onlyWhenAwaySec` and `always` do.
+
 Waiting messages are urgent by nature, so they ignore the duration and debounce filters. The rules for the ones that arrive close together:
 
 - **Waiting de-duplication.** A "⏳ permission" alert is skipped only if a "❓ question" alert for the same session went out in the previous 2 minutes (the agent often raises both for one question). Two permission requests in a row both notify.
@@ -113,7 +115,7 @@ To see why a particular message was or wasn't sent, run `awty status` and read t
   - For Claude Code it's based on the end of the conversation; for Codex and Antigravity, on the agent's last message.
   - It needs the `claude` CLI installed, whichever tool the session runs in, and adds a few seconds and a small API cost per Done message.
   - If `claude` is missing, fails or takes more than 15 seconds, awty silently falls back to `last-message`.
-  - Only Done uses it. Paused and Waiting messages (and test messages) always use `last-message`.
+  - Only Done uses it, and not the Done for a finished background session. Paused and Waiting messages (and test messages) always use `last-message`.
 
 ## Storing secrets
 
