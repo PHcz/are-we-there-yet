@@ -30,7 +30,7 @@ export function normalize(raw) {
     case 'Notification':
       // Sent by a mod through $.ui.notify(text, { title }).
       if (raw.notification_type === 'plugin_notification') {
-        return { ...base, type: 'waiting', text: [raw.title, raw.message].filter(Boolean).join(': ') };
+        return { ...base, type: 'mod', text: [raw.title, raw.message].filter(Boolean).join(': ') };
       }
       // A background session ended ("<label> finished|failed"): not this session's turn.
       if (raw.notification_type === 'agent_completed') return { ...base, type: 'agent_done', text: raw.message ?? '' };

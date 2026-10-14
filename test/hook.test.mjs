@@ -113,7 +113,7 @@ test('plugin_notification sends a waiting job as "title: message"', () => {
     message: 'Holding rm -rf build: would delete 9 files (1.2 MB). Runs by itself in 30s unless you press Cancel.',
   }, { now: NOW, idle: noIdle });
   assert.equal(r.job.kind, 'waiting');
-  assert.equal(r.job.waitingReason, 'permission');
+  assert.equal(r.job.waitingReason, 'mod');
   assert.match(r.job.summaryInput.text, /^Blast Radius: Holding rm -rf build/);
   assert.equal(loadState('s1').lastWaitingSentAt, NOW);
 });
@@ -121,6 +121,14 @@ test('plugin_notification sends a waiting job as "title: message"', () => {
 test('plugin_notification without a title sends the message alone', () => {
   const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'plugin_notification', message: 'Build is waiting' }, { now: NOW, idle: noIdle });
   assert.equal(r.job.summaryInput.text, 'Build is waiting');
+});
+
+test('plugin_notification is not skipped as a duplicate of a recent question alert', () => {
+  saveState('s1', { lastQuestionSentAt: NOW - 30000 });
+  const r = handle({ ...base, hook_event_name: 'Notification', notification_type: 'plugin_notification', title: 'Blast Radius', message: 'Holding rm -rf build' }, { now: NOW, idle: noIdle });
+  assert.equal(r.job.waitingReason, 'mod');
+  const p = handle({ ...base, hook_event_name: 'Notification', notification_type: 'permission_prompt', message: 'Claude needs permission' }, { now: NOW, idle: noIdle });
+  assert.equal(p.job, undefined);
 });
 
 test('worker_permission_prompt sends a waiting job', () => {

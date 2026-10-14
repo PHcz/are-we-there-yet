@@ -47,7 +47,7 @@ You don't need to restart anything after changing settings: they are re-read on 
 | `enabled` | `true` | Master switch |
 | `channels` | `["macos"]` on macOS, none elsewhere | Where messages go. On Linux, set a channel first. See [Channels](channels.md). |
 | `events.done` | `true` | Send "✅ Done" when a task finishes |
-| `events.waiting` | `true` | Send "❓/⏳ Waiting for you" when the agent asks a question or needs permission |
+| `events.waiting` | `true` | Send "❓/⏳ Waiting for you" when the agent asks a question or needs permission, and "📣 Needs attention" when a Claude Code mod raises a notification |
 | `events.paused` | `true` | Send "⏸ Paused" when Claude Code stops while background tasks are still running (Claude Code only; see [Paused](how-it-works.md#paused-background-jobs)) |
 | `filters.minDurationSec` | `60` | Only send Done if the task took at least this many seconds |
 | `filters.onlyWhenAwaySec` | `0` (off) | Only send if your Mac has had no keyboard or mouse input for this many seconds. macOS only: on Linux it is ignored and messages are sent. |
@@ -65,7 +65,7 @@ Each kind of message has its own switch. All three are on by default.
 | Switch | Message | Tools |
 |---|---|---|
 | `done=on\|off` | ✅ Done | all |
-| `waiting=on\|off` | ❓ and ⏳ Waiting for you. Questions and permission requests share this one switch. | all |
+| `waiting=on\|off` | ❓ and ⏳ Waiting for you, and 📣 Needs attention. Questions, permission requests and mod notifications share this one switch. | all |
 | `paused=on\|off` | ⏸ Paused | Claude Code |
 
 Set them for one session, one project, or everything:
@@ -102,7 +102,7 @@ A ✅ Done for a finished background session (Claude Code's `agent_completed`) h
 
 Waiting messages are urgent by nature, so they ignore the duration and debounce filters. The rules for the ones that arrive close together:
 
-- **Waiting de-duplication.** A "⏳ permission" alert is skipped only if a "❓ question" alert for the same session went out in the previous 2 minutes (the agent often raises both for one question). Two permission requests in a row both notify.
+- **Waiting de-duplication.** A "⏳ permission" alert is skipped only if a "❓ question" alert for the same session went out in the previous 2 minutes (the agent often raises both for one question). Two permission requests in a row both notify, and a 📣 mod notification is never skipped.
 - **Done after a Waiting message.** If you were sent a Waiting message during the same task, its Done skips the minimum-duration filter only. You were probably away, so you'll want to know when it finished. Debounce and away-from-keyboard still apply.
 - **Unknown start.** If awty doesn't know when the task started (the session began before you installed awty), Done is sent without a duration and the minimum-duration filter doesn't apply.
 

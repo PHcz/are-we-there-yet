@@ -19,14 +19,14 @@ Antigravity  ─┘
 | ⏸ **Paused**: the turn ended but background jobs are still running | `Stop` while jobs started with `run_in_background` haven't reported back | — | — |
 | ❓ **Waiting**: the agent asked you a question | `PreToolUse` on `AskUserQuestion` | — (Codex has no question tool) | `PreToolUse` on `ask_question` / `ask_permission` |
 | ⏳ **Waiting**: the agent, a subagent or a teammate needs permission | `Notification` (`permission_prompt`, `elicitation_dialog`, `agent_needs_input`, `worker_permission_prompt`) | `PermissionRequest` | — (Antigravity doesn't expose this) |
-| ⏳ **Waiting**: a mod wants your attention | `Notification` (`plugin_notification`) | — | — |
+| 📣 **Needs attention**: a mod wants your attention | `Notification` (`plugin_notification`) | — | — |
 | Turn start (used for the duration) | `UserPromptSubmit` | `UserPromptSubmit` | read from Antigravity's transcript |
 
 Details per tool:
 
 - **Claude Code.**
   - Claude Code also sends an "idle" notification about a minute after every finished turn. are-we-there-yet ignores it, because the Done message already covers that moment.
-  - A mod (a Claude Code plugin that changes its interface) can raise its own notification with `$.ui.notify(text, { title })`. It's sent as ⏳ Waiting, with the text `<title>: <text>`. For example, the Blast Radius mod sends "Blast Radius: Holding rm -rf build: would delete 9 files…" when it holds a risky command.
+  - A mod (a Claude Code plugin that changes its interface) can raise its own notification with `$.ui.notify(text, { title })`. It's sent as 📣 Needs attention, with the text `<title>: <text>`. It's switched on and off with `waiting=`, but unlike a ⏳ permission alert it's never skipped as a duplicate of a question. For example, the Blast Radius mod sends "Blast Radius: Holding rm -rf build: would delete 9 files…" when it holds a risky command.
   - When a background session ends, Claude Code sends "`<label>` finished" or "`<label>` failed". It's sent as ✅ Done with that text as the summary, and without a duration. Only the `done` switch, `always` and the away-from-keyboard filter apply to it; it isn't counted by `debounceSec`, so it can't hold back the Done for your own task.
   - Other Claude Code notifications (sign-in results, computer use starting or stopping, and so on) are ignored.
   - When a background job or subagent finishes, Claude Code wakes the session with an injected message. That isn't treated as a new request, so the Done at the real end still shows the full duration.

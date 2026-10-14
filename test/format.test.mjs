@@ -50,6 +50,9 @@ test('formatMessage done returns structured fields and plain renderings', () => 
 test('formatMessage waiting and test variants', () => {
   const now = new Date(2026, 9, 4, 9, 5);
   assert.equal(formatMessage({ kind: 'waiting', waitingReason: 'question', sessionName: 's', summary: 'q?', cwd: '/x', now }).title, '❓ Waiting for you · s');
+  const m = formatMessage({ kind: 'waiting', waitingReason: 'mod', sessionName: 's', summary: 'Blast Radius: Holding rm -rf build', cwd: '/x', now });
+  assert.equal(m.title, '📣 Needs attention · s');
+  assert.equal(m.status, 'Needs attention');
   const p = formatMessage({ kind: 'waiting', waitingReason: 'permission', sessionName: 's', summary: '', cwd: '/x', now });
   assert.equal(p.title, '⏳ Waiting for you · s');
   assert.equal(p.body, 'x · 09:05');
